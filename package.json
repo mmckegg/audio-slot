@@ -1,0 +1,29 @@
+{
+  "name": "audio-slot",
+  "version": "0.0.0",
+  "description": "Web Audio API triggerable audio slot described with JSON consisting of sources, processors, and modulators.",
+  "main": "index.js",
+  "scripts": {
+    "test": "beefy test.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/audio-slot.git"
+  },
+  "keywords": [
+    "soundbank",
+    "waapi",
+    "AudioNode",
+    "modulator",
+    "source",
+    "AudioParam",
+    "json",
+    "midi"
+  ],
+  "author": "Matt McKegg",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mmckegg/audio-slot/issues"
+  },
+  "homepage": "https://github.com/mmckegg/audio-slot"
+}
