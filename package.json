@@ -10,6 +10,13 @@
     "type": "git",
     "url": "https://github.com/mmckegg/audio-slot.git"
   },
+  "dependencies": {
+    "custom-audio-node": "~0.1.1"
+  },
+  "devDependencies": {
+    "soundbank-sample": "*",
+    "soundbank-oscillator": "*"
+  },
   "keywords": [
     "soundbank",
     "waapi",

@@ -84,7 +84,7 @@ var slot = AudioSlot(audioContext, {
       url: 'hiss.wav',
       startOffset: 0.2,
       endOffset: 1,
-      transpose: -3
+      transpose: -3,
       mode: 'loop',
 
       amp: { // add a modulator from audioContext.modulators
@@ -119,7 +119,7 @@ var bus = AudioSlot(audioContext, {
 
   // specify how to handle trigger events
   inputMode: 'on' // other options: bypass, holdOn, holdOff, bypassOn, bypassOff
-  
+
   processors: [
     { node: 'filter',
       type: 'lowpass',
