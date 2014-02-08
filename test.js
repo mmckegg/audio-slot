@@ -57,6 +57,11 @@ addButton('trigger on', function(){
   slot.triggerOn(audioContext.currentTime)
 })
 
+addButton('choke + trigger on', function(){
+  slot.choke(audioContext.currentTime)
+  slot.triggerOn(audioContext.currentTime)
+})
+
 addButton('trigger off', function(){
   slot.triggerOff(audioContext.currentTime)
 })
@@ -86,8 +91,12 @@ textArea.style.display = 'block'
 textArea.style.width = '100%'
 textArea.rows = 50
 textArea.value = JSON.stringify(descriptor, null, 2)
-textArea.onchange = function(){
-  descriptor = JSON.parse(textArea.value)
+textArea.oninput = function(){
+  try {
+    descriptor = JSON.parse(textArea.value)
+  } catch (ex){
+    return
+  }
   slot.update(descriptor)
 }
 
