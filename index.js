@@ -51,6 +51,11 @@ function triggerOn(at, velocity){
       updateParams(this.context, event, descriptor)
       var offTime = source.start(at)
 
+      for (var x=0;x<event.modulators.length;x++){
+        var modulator = event.modulators[x]
+        modulator.start(at)
+      }
+
       source.connect(this._pre)
 
       if (offTime){
@@ -59,16 +64,20 @@ function triggerOn(at, velocity){
 
         for (var x=0;x<event.modulators.length;x++){
           var modulator = event.modulators[x]
-          modulator.stop(at, true)
+          modulator.stop(offTime, true)
         }
       }
 
       this._active.push(event)
     } 
   }
+
+  startProcessorModulators(this._currentProcessors, at)
 }
 
 function triggerOff(at){
+
+  at = stopProcessorModulators(this._currentProcessors, at)
 
   var active = this._active
   for (var i=0;i<active.length;i++){
@@ -86,6 +95,7 @@ function triggerOff(at){
       event.node.stop(offTime)
     }
   }
+
 }
 
 function choke(at){
@@ -121,6 +131,35 @@ function update(descriptor){
 
 
 ///////////////////
+
+function startProcessorModulators(processors, at){
+  for (var i=0;i<processors.length;i++){
+    var container = processors[i]
+    for (var x=0;x<container.modulators.length;x++){
+      var modulator = container.modulators[x]
+      if (modulator.start){
+        modulator.start(at)
+      }
+    }
+  }
+}
+
+function stopProcessorModulators(processors, at, isTarget){
+  var stopAt = at
+  for (var i=0;i<processors.length;i++){
+    var container = processors[i]
+    for (var x=0;x<container.modulators.length;x++){
+      var modulator = container.modulators[x]
+      if (modulator.stop){
+        var res = modulator.stop(at, isTarget)
+        if (res > stopAt){
+          stopAt = res 
+        }
+      }
+    }
+  }
+  return stopAt
+}
 
 function handlePlayerEnd(event){
   var active = this._active

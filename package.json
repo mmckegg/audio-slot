@@ -16,7 +16,8 @@
   },
   "devDependencies": {
     "soundbank-sample": "*",
-    "soundbank-oscillator": "*"
+    "soundbank-oscillator": "*",
+    "adsr": "*"
   },
   "keywords": [
     "soundbank",

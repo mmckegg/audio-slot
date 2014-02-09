@@ -12,10 +12,10 @@ audioContext.processors = {
   //delay: require('soundbank-delay')
 }
 
-//audioContext.modulators = {
+audioContext.modulators = {
 //  lfo: require('soundbank-lfo'),
-//  adsr: require('soundbank-adsr')
-//}
+  adsr: require('adsr')
+}
 
 audioContext.sampleCache = {}
 
