@@ -31,7 +31,7 @@ A new descriptor object to update the internal nodes to. Will find and update al
 
 ### slot.triggerOn(at, velocity)
 
-Trigger all sources start method and synchronize modulators.
+Trigger all source and modulator start methods.
 
 ### slot.triggerOff(at)
 
@@ -68,8 +68,8 @@ audioContext.processors = {
 }
 
 audioContext.modulators = {
-  lfo: require('soundbank-lfo'),
-  adsr: require('soundbank-adsr')
+  lfo: require('lfo'),
+  adsr: require('adsr')
 }
 
 audioContext.sampleCache = {}
