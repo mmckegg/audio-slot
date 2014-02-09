@@ -51,6 +51,8 @@ var descriptor = {
 }
 
 var slot = AudioSlot(audioContext, descriptor)
+
+window.context = { slot: slot }
 slot.connect(audioContext.destination)
 
 addButton('trigger on', function(){

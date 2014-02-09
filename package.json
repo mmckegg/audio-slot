@@ -11,7 +11,8 @@
     "url": "https://github.com/mmckegg/audio-slot.git"
   },
   "dependencies": {
-    "custom-audio-node": "~0.1.1"
+    "custom-audio-node": "~0.1.1",
+    "deep-equal": "~0.2.1"
   },
   "devDependencies": {
     "soundbank-sample": "*",

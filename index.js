@@ -1,5 +1,8 @@
 var CustomNode = require('custom-audio-node')
 
+var updateParams = require('./lib/update_params')
+var updateProcessors = require('./lib/update_processors')
+
 module.exports = function(audioContext, descriptor){
   var input = audioContext.createGain()
   var output = audioContext.createGain()
@@ -40,16 +43,19 @@ function triggerOn(at, velocity){
   for (var i=0;i<descriptors.length;i++){
     var descriptor = descriptors[i]
     if (descriptor.node && typeof sources[descriptor.node] === 'function'){
-      var player = sources[descriptor.node](this.context)
-      var event = {from: at, player: player, modulators: [], descriptor: {}, sourceIndex: i}
-      updateCurrent(event, descriptor)
-      var offTime = player.start(at)
+      var source = sources[descriptor.node](this.context)
+      var event = {from: at, node: source, modulators: [], descriptor: {}, nodeIndex: i}
 
-      player.connect(this._pre)
+      source.onended = handlePlayerEnd.bind(this, event)
+
+      updateParams(this.context, event, descriptor)
+      var offTime = source.start(at)
+
+      source.connect(this._pre)
 
       if (offTime){
         event.to = offTime
-        player.stop(offTime)
+        source.stop(offTime)
 
         for (var x=0;x<event.modulators.length;x++){
           var modulator = event.modulators[x]
@@ -57,7 +63,6 @@ function triggerOn(at, velocity){
         }
       }
 
-      player.onended = handlePlayerEnd.bind(this, event)
       this._active.push(event)
     } 
   }
@@ -78,7 +83,7 @@ function triggerOff(at){
         }
       }
       event.to = at
-      event.player.stop(offTime)
+      event.node.stop(offTime)
     }
   }
 }
@@ -89,8 +94,8 @@ function choke(at){
     var event = active[i]
     if ((!event.to || at < event.to+0.01) && at > event.from){
       var choker = this.context.createGain()
-      event.player.disconnect()
-      event.player.connect(choker)
+      event.node.disconnect()
+      event.node.connect(choker)
       choker.connect(this._pre)
       choker.gain.setTargetAtTime(0, at, 0.01)
       event.choked = true
@@ -104,8 +109,8 @@ function update(descriptor){
   var active = this._active
   for (var i=0;i<active.length;i++){
     var event = active[i]
-    if (~event.sourceIndex){
-      updateCurrent(event, sourceDescriptors[event.sourceIndex])
+    if (~event.nodeIndex){
+      updateParams(this.context, event, sourceDescriptors[event.nodeIndex])
     }
   }
 
@@ -123,33 +128,4 @@ function handlePlayerEnd(event){
   if (~index){
     active.splice(index, 1)
   }
-}
-
-function updateCurrent(event, descriptor){
-  var properties = Object.getOwnPropertyNames(event.player)
-  var keys = Object.keys(descriptor)
-  for (var i=0;i<keys.length;i++){
-    var key = keys[i]
-
-    var value = descriptor[key]
-    var object = null
-
-    if (value instanceof Object && !Array.isArray(value)){
-      object = value
-      value = object.value
-    }
-
-    if (~properties.indexOf(key)){
-      var prop = event.player[key]
-      if (prop && Object.prototype.hasOwnProperty.call(prop, 'value')){
-        event.player[key].value = value
-      } else {
-        event.player[key] = value
-      }
-    }
-  }
-}
-
-function updateProcessors(slot, processorDescriptors){
-
 }
