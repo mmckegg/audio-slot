@@ -13,6 +13,7 @@ module.exports = function(audioContext, descriptor){
   slot._descriptor = {}
   slot._currentProcessors = []
   slot._active = []
+  slot.descriptor = {}
 
   slot._pre = audioContext.createGain()
   slot._pre.connect(output)
@@ -73,11 +74,13 @@ function triggerOn(at, velocity){
   }
 
   startProcessorModulators(this._currentProcessors, at)
+  triggerInput(this, at, true)
 }
 
 function triggerOff(at){
 
   at = stopProcessorModulators(this._currentProcessors, at)
+  triggerInput(this, at, false)
 
   var active = this._active
   for (var i=0;i<active.length;i++){
@@ -125,6 +128,7 @@ function update(descriptor){
   }
 
   updateProcessors(this, descriptor.processors)
+  updateInput(this, descriptor)
 
   this.descriptor = descriptor
 }
@@ -166,5 +170,61 @@ function handlePlayerEnd(event){
   var index = active.indexOf(event)
   if (~index){
     active.splice(index, 1)
+  }
+}
+
+function triggerInput(slot, at, value){
+  slot._isOn = value
+
+  var mode = slot.descriptor.inputMode
+
+  var onValue = value ? 1 : 0
+  var offValue = value ? 0 : 1
+
+  if (mode === 'holdOn'){
+    slot._flow.gain.setValueAtTime(onValue, at)
+  } else if (mode === 'holdOff'){
+    slot._flow.gain.setValueAtTime(offValue, at)
+  } else if (mode === 'bypassOff'){
+    slot._flow.gain.setValueAtTime(onValue, at)
+    slot._bypass.gain.setValueAtTime(offValue, at)
+  } else if (mode === 'bypassOn'){
+    slot._flow.gain.setValueAtTime(offValue, at)
+    slot._bypass.gain.setValueAtTime(onValue, at)
+  }
+}
+
+function updateInput(slot, descriptor){
+
+  var at = slot.context.currentTime
+  var oldMode = 'inputMode' in slot.descriptor ? slot.descriptor.inputMode : 'on'
+  var newMode = 'inputMode' in descriptor ? descriptor.inputMode : 'on'
+
+  if (oldMode != newMode){
+    slot._flow.gain.cancelScheduledValues(slot.context.currentTime)
+    slot._bypass.gain.cancelScheduledValues(slot.context.currentTime)
+
+    if (newMode === 'on'){
+      slot._flow.gain.setValueAtTime(1, at)
+      slot._bypass.gain.setValueAtTime(0, at)
+    } else if (newMode === 'bypass'){
+      slot._flow.gain.setValueAtTime(0, at)
+      slot._bypass.gain.setValueAtTime(1, at)
+    } else if (newMode === 'holdOn'){
+      slot._flow.gain.setValueAtTime(slot._isOn ? 1 : 0, at)
+      slot._bypass.gain.setValueAtTime(0, at)
+    } else if (newMode === 'holdOff'){
+      slot._flow.gain.setValueAtTime(slot._isOn ? 0 : 1, at)
+      slot._bypass.gain.setValueAtTime(0, at)
+    } else if (newMode === 'bypassOff'){
+      slot._flow.gain.setValueAtTime(slot._isOn ? 1 : 0, at)
+      slot._bypass.gain.setValueAtTime(slot._isOn ? 0 : 1, at)
+    } else if (newMode === 'bypassOn'){
+      slot._flow.gain.setValueAtTime(slot._isOn ? 0 : 1, at)
+      slot._bypass.gain.setValueAtTime(slot._isOn ? 1 : 0, at)
+    } else {
+      slot._flow.gain.setValueAtTime(0, at)
+      slot._bypass.gain.setValueAtTime(0, at)
+    }
   }
 }

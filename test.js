@@ -88,6 +88,14 @@ addButton('trigger 2s, choke 0.4s', function(){
   slot.choke(audioContext.currentTime+1)
 })
 
+addButton('play sound thru slot input', function(){
+  var player = audioContext.sources.sample(audioContext)
+  player.url = 'hiss.wav'
+  player.connect(slot)
+  player.mode = 'oneshot'
+  player.start(audioContext.currentTime)
+})
+
 var textArea = document.createElement('textarea')
 textArea.style.display = 'block'
 textArea.style.width = '100%'
