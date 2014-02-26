@@ -8,8 +8,8 @@ audioContext.sources = {
 
 audioContext.processors = {
   gain: audioContext.createGain.bind(audioContext),
-  filter: audioContext.createBiquadFilter.bind(audioContext)//,
-  //delay: require('soundbank-delay')
+  filter: audioContext.createBiquadFilter.bind(audioContext),
+  delay: require('soundbank-delay')
 }
 
 audioContext.modulators = {
@@ -44,8 +44,8 @@ var descriptor = {
   ],
   processors: [
     { node: 'delay',
-      delayTime: 100,
-      wetLevel: 0.6
+      time: 0.1,
+      wet: 0.6
     }
   ]
 }

@@ -17,6 +17,7 @@
   "devDependencies": {
     "soundbank-sample": "*",
     "soundbank-oscillator": "*",
+    "soundbank-delay": "*",
     "adsr": "*"
   },
   "keywords": [

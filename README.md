@@ -62,9 +62,9 @@ audioContext.sources = {
 }
 
 audioContext.processors = {
-  gain: require('soundbank-gain'),
-  delay: require('soundbank-delay'),
-  filter: require('soundbank-filter')
+  gain: audioContext.createGain.bind(audioContext), // can use built in nodes
+  filter: audioContext.createBiquadFilter.bind(audioContext),
+  delay: require('soundbank-delay')
 }
 
 audioContext.modulators = {
