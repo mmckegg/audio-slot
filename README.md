@@ -118,7 +118,8 @@ You can also use audio-slot instances as routing busses as by default they accep
 var bus = AudioSlot(audioContext, {
 
   // specify how to handle trigger events
-  inputMode: 'on' // other options: bypass, holdOn, holdOff, bypassOn, bypassOff
+  inputMode: 'on', // other options: bypass, holdOn, holdOff, bypassOn, bypassOff
+  volume: 1, // output gain
 
   processors: [
     { node: 'filter',
