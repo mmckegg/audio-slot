@@ -99,8 +99,8 @@ var slot = AudioSlot(audioContext, {
   ],
   processors: [
     { node: 'delay',
-      delayTime: 100,
-      wetLevel: 0.6
+      time: 0.1,
+      wet: 0.6
     }
   ]
 })
