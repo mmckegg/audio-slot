@@ -127,6 +127,19 @@ function update(descriptor){
     }
   }
 
+
+  // prime sources (preload samples, etc)
+  if (descriptor.sources){
+    for (var i=0;i<descriptor.sources.length;i++){
+      var desc = descriptor.sources[i]
+      if (desc.node){
+        var source = this.context.sources[desc.node]
+        if (source && source.prime){
+          source.prime(this.context, desc)
+        }
+      }
+    }
+  }
   updateProcessors(this, descriptor.processors)
   updateInput(this, descriptor)
 
