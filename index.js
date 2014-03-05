@@ -15,6 +15,9 @@ module.exports = function(audioContext, descriptor){
   slot._active = []
   slot.descriptor = {}
 
+  // update volume
+  slot._outputContainer = {node: slot._output, descriptor: {}, modulators: []}
+
   slot._pre = audioContext.createGain()
   slot._pre.connect(output)
 
@@ -32,6 +35,7 @@ module.exports = function(audioContext, descriptor){
   slot.triggerOn = triggerOn
   slot.triggerOff = triggerOff
   slot.choke = choke
+  slot.chokeGroup = null
 
   slot.update(descriptor)
 
@@ -73,13 +77,13 @@ function triggerOn(at, velocity){
     } 
   }
 
-  startProcessorModulators(this._currentProcessors, at)
+  startProcessorModulators(this, at)
   triggerInput(this, at, true)
 }
 
 function triggerOff(at){
 
-  at = stopProcessorModulators(this._currentProcessors, at)
+  at = stopProcessorModulators(this, at)
   triggerInput(this, at, false)
 
   var active = this._active
@@ -140,16 +144,21 @@ function update(descriptor){
       }
     }
   }
+
   updateProcessors(this, descriptor.processors)
   updateInput(this, descriptor)
 
+  updateParams(this.context, this._outputContainer, {gain: descriptor.volume})
+
+  this.chokeGroup = descriptor.chokeGroup == null ? null : descriptor.chokeGroup
   this.descriptor = descriptor
 }
 
 
 ///////////////////
 
-function startProcessorModulators(processors, at){
+function startProcessorModulators(slot, at){
+  var processors = slot._currentProcessors
   for (var i=0;i<processors.length;i++){
     var container = processors[i]
     for (var x=0;x<container.modulators.length;x++){
@@ -159,9 +168,19 @@ function startProcessorModulators(processors, at){
       }
     }
   }
+
+  // handle output volume modulation
+  var container = slot._outputContainer
+  for (var x=0;x<container.modulators.length;x++){
+    var modulator = container.modulators[x]
+    if (modulator.start){
+      modulator.start(at)
+    }
+  }
 }
 
-function stopProcessorModulators(processors, at, isTarget){
+function stopProcessorModulators(slot, at, isTarget){
+  var processors = slot._currentProcessors
   var stopAt = at
   for (var i=0;i<processors.length;i++){
     var container = processors[i]
@@ -175,6 +194,18 @@ function stopProcessorModulators(processors, at, isTarget){
       }
     }
   }
+
+  var container = slot._outputContainer
+  for (var x=0;x<container.modulators.length;x++){
+    var modulator = container.modulators[x]
+    if (modulator.stop){
+      var res = modulator.stop(at, isTarget)
+      if (res > stopAt){
+        stopAt = res 
+      }
+    }
+  }
+  
   return stopAt
 }
 
