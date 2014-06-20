@@ -248,26 +248,36 @@ function updateInput(slot, descriptor){
     slot._flow.gain.cancelScheduledValues(slot.context.currentTime)
     slot._bypass.gain.cancelScheduledValues(slot.context.currentTime)
 
-    if (newMode === 'on'){
-      slot._flow.gain.setValueAtTime(1, at)
+    if (newMode === 'off'){
+      slot._flow.gain.setValueAtTime(0, at)
       slot._bypass.gain.setValueAtTime(0, at)
     } else if (newMode === 'bypass'){
       slot._flow.gain.setValueAtTime(0, at)
       slot._bypass.gain.setValueAtTime(1, at)
     } else if (newMode === 'holdOn'){
+      // turns on input when held
+      // turns off when released
       slot._flow.gain.setValueAtTime(slot._isOn ? 1 : 0, at)
       slot._bypass.gain.setValueAtTime(0, at)
     } else if (newMode === 'holdOff'){
+      // turns off input when held
+      // turns on when released
       slot._flow.gain.setValueAtTime(slot._isOn ? 0 : 1, at)
       slot._bypass.gain.setValueAtTime(0, at)
     } else if (newMode === 'bypassOff'){
+      // always on
+      // turns on effects when held
+      // bypasses effects when released
       slot._flow.gain.setValueAtTime(slot._isOn ? 1 : 0, at)
       slot._bypass.gain.setValueAtTime(slot._isOn ? 0 : 1, at)
     } else if (newMode === 'bypassOn'){
+      // always on
+      // bypasses effects when held
+      // turns on effects when released
       slot._flow.gain.setValueAtTime(slot._isOn ? 0 : 1, at)
       slot._bypass.gain.setValueAtTime(slot._isOn ? 1 : 0, at)
     } else {
-      slot._flow.gain.setValueAtTime(0, at)
+      slot._flow.gain.setValueAtTime(1, at)
       slot._bypass.gain.setValueAtTime(0, at)
     }
   }
