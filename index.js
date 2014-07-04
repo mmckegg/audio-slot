@@ -109,7 +109,7 @@ function choke(at){
   var active = this._active
   for (var i=0;i<active.length;i++){
     var event = active[i]
-    if ((!event.to || at < event.to+0.01) && at > event.from){
+    if (!event.choked && (!event.to || at < event.to+0.01) && at > event.from){
       var choker = this.context.createGain()
       event.node.disconnect()
       event.node.connect(choker)
