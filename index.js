@@ -98,8 +98,7 @@ function triggerOff(at){
           offTime = time
         }
       }
-      event.to = at
-      event.node.stop(offTime)
+      event.to = event.node.stop(offTime) || offTime
     }
   }
 
