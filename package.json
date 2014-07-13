@@ -1,6 +1,6 @@
 {
   "name": "audio-slot",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Web Audio API triggerable audio slot described with JSON consisting of sources, processors, and modulators.",
   "main": "index.js",
   "scripts": {
