@@ -1,5 +1,5 @@
 var AudioSlot = require('./index')
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 
 audioContext.sources = {
   sample: require('soundbank-sample'),

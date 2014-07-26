@@ -54,7 +54,7 @@ Disconnect the slot from all previously connected destination AudioNodes.
 ```js
 var AudioSlot = require('audio-slot')
 
-var audioContext = new webkitAudioContext()
+var audioContext = new AudioContext()
 
 audioContext.sources = {
   sample: require('soundbank-sample'),
