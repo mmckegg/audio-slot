@@ -8,6 +8,8 @@ module.exports = function(audioContext, descriptor){
   var output = audioContext.createGain()
 
   var slot = CustomNode(input, output)
+  slot._context = audioContext
+
   slot._input = input
   slot._output = output
   slot._descriptor = {}
@@ -43,17 +45,17 @@ module.exports = function(audioContext, descriptor){
 }
 
 function triggerOn(at, velocity){
-  var sources = this.context.sources || {}
+  var sources = this._context.sources || {}
   var descriptors = this.descriptor.sources || []
   for (var i=0;i<descriptors.length;i++){
     var descriptor = descriptors[i]
     if (descriptor.node && typeof sources[descriptor.node] === 'function'){
-      var source = sources[descriptor.node](this.context)
+      var source = sources[descriptor.node](this._context)
       var event = {from: at, node: source, modulators: [], descriptor: {}, nodeIndex: i}
 
       source.onended = handlePlayerEnd.bind(this, event)
 
-      updateParams(this.context, event, descriptor)
+      updateParams(this._context, event, descriptor)
       var offTime = source.start(at)
 
       for (var x=0;x<event.modulators.length;x++){
@@ -109,7 +111,7 @@ function choke(at){
   for (var i=0;i<active.length;i++){
     var event = active[i]
     if (!event.choked && (!event.to || at < event.to+0.01) && at > event.from){
-      var choker = this.context.createGain()
+      var choker = this._context.createGain()
       event.node.disconnect()
       event.node.connect(choker)
       choker.connect(this._pre)
@@ -126,7 +128,7 @@ function update(descriptor){
   for (var i=0;i<active.length;i++){
     var event = active[i]
     if (~event.nodeIndex){
-      updateParams(this.context, event, sourceDescriptors[event.nodeIndex])
+      updateParams(this._context, event, sourceDescriptors[event.nodeIndex])
     }
   }
 
@@ -136,9 +138,9 @@ function update(descriptor){
     for (var i=0;i<descriptor.sources.length;i++){
       var desc = descriptor.sources[i]
       if (desc.node){
-        var source = this.context.sources[desc.node]
+        var source = this._context.sources[desc.node]
         if (source && source.prime){
-          source.prime(this.context, desc)
+          source.prime(this._context, desc)
         }
       }
     }
@@ -147,7 +149,7 @@ function update(descriptor){
   updateProcessors(this, descriptor.processors)
   updateInput(this, descriptor)
 
-  updateParams(this.context, this._outputContainer, {gain: descriptor.volume})
+  updateParams(this._context, this._outputContainer, {gain: descriptor.volume})
 
   this.chokeGroup = descriptor.chokeGroup == null ? null : descriptor.chokeGroup
   this.descriptor = descriptor
