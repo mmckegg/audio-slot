@@ -54,7 +54,9 @@ AudioSlot.prototype = {
 
         for (var x=0;x<event.modulators.length;x++){
           var modulator = event.modulators[x]
-          modulator.start(at)
+          if (modulator.start){
+            modulator.start(at)
+          }
         }
 
         source.connect(this._pre)
@@ -65,7 +67,9 @@ AudioSlot.prototype = {
 
           for (var x=0;x<event.modulators.length;x++){
             var modulator = event.modulators[x]
-            modulator.stop(offTime, true)
+            if (modulator.stop){
+              modulator.stop(offTime, true)
+            }
           }
         }
 
@@ -87,9 +91,11 @@ AudioSlot.prototype = {
         var offTime = at
         for (var x=0;x<event.modulators.length;x++){
           var modulator = event.modulators[x]
-          var time = modulator.stop(at)
-          if (time && time > offTime){
-            offTime = time
+          if (modulator.stop){
+            var time = modulator.stop(at)
+            if (time && time > offTime){
+              offTime = time
+            }
           }
         }
         event.to = event.node.stop(offTime) || offTime
