@@ -91,7 +91,7 @@ addButton('trigger 2s, choke 0.4s', function(){
 addButton('play sound thru slot input', function(){
   var player = audioContext.sources.sample(audioContext)
   player.url = 'hiss.wav'
-  player.connect(slot)
+  player.connect(slot.input)
   player.mode = 'oneshot'
   player.start(audioContext.currentTime)
 })

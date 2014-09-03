@@ -4,21 +4,21 @@
   "description": "Web Audio API triggerable audio slot described with JSON consisting of sources, processors, and modulators.",
   "main": "index.js",
   "scripts": {
-    "test": "beefy test.js"
+    "example": "beefy example.js"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/mmckegg/audio-slot.git"
   },
   "dependencies": {
-    "custom-audio-node": "^0.3.0",
     "deep-equal": "~0.2.1"
   },
   "devDependencies": {
-    "soundbank-sample": "*",
-    "soundbank-oscillator": "*",
+    "adsr": "*",
+    "beefy": "^2.1.1",
     "soundbank-delay": "*",
-    "adsr": "*"
+    "soundbank-oscillator": "*",
+    "soundbank-sample": "*"
   },
   "keywords": [
     "soundbank",

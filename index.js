@@ -1,160 +1,159 @@
-var CustomNode = require('custom-audio-node')
-
 var updateParams = require('./lib/update_params')
 var updateProcessors = require('./lib/update_processors')
 
-module.exports = function(audioContext, descriptor){
-  var input = audioContext.createGain()
-  var output = audioContext.createGain()
+module.exports = AudioSlot
 
-  var slot = CustomNode(input, output)
-  slot._context = audioContext
+function AudioSlot(audioContext, descriptor){
+  if (!(this instanceof AudioSlot)){
+    return new AudioSlot(audioContext, descriptor)
+  }
 
-  slot._input = input
-  slot._output = output
-  slot._descriptor = {}
-  slot._currentProcessors = []
-  slot._active = []
-  slot.descriptor = {}
+  this.context = audioContext
+  this.input = audioContext.createGain()
+  this.output = audioContext.createGain()
+  this.descriptor = {}
 
-  // update volume
-  slot._outputContainer = {node: slot._output, descriptor: {}, modulators: []}
+  this._currentProcessors = []
+  this._active = []
+  this._outputContainer = {node: this.output, descriptor: {}, modulators: []}
 
-  slot._pre = audioContext.createGain()
-  slot._pre.connect(output)
+  this._pre = audioContext.createGain()
+  this._pre.connect(this.output)
 
-  // bus / inputMode routing  
-  slot._flow = audioContext.createGain()
-  slot._bypass = audioContext.createGain()
-  input.connect(slot._flow)
-  slot._flow.connect(slot._pre)
-  input.connect(slot._bypass)
-  slot._bypass.gain.value = 0
-  slot._bypass.connect(output)
+  // bus / inputMode routing
+  this._flow = audioContext.createGain()
+  this._bypass = audioContext.createGain()
+  this.input.connect(this._flow)
+  this._flow.connect(this._pre)
+  this.input.connect(this._bypass)
+  this._bypass.gain.value = 0
+  this._bypass.connect(this.output)
 
-  slot.context = audioContext
-  slot.update = update
-  slot.triggerOn = triggerOn
-  slot.triggerOff = triggerOff
-  slot.choke = choke
-  slot.chokeGroup = null
 
-  slot.update(descriptor)
-
-  return slot
+  if (descriptor){
+    this.update(descriptor)
+  }
 }
 
-function triggerOn(at, velocity){
-  var sources = this._context.sources || {}
-  var descriptors = this.descriptor.sources || []
-  for (var i=0;i<descriptors.length;i++){
-    var descriptor = descriptors[i]
-    if (descriptor.node && typeof sources[descriptor.node] === 'function'){
-      var source = sources[descriptor.node](this._context)
-      var event = {from: at, node: source, modulators: [], descriptor: {}, nodeIndex: i}
+AudioSlot.prototype = {
+  constructor: AudioSlot,
 
-      source.onended = handlePlayerEnd.bind(this, event)
+  triggerOn: function(at, velocity){
+    var sources = this.context.sources || {}
+    var descriptors = this.descriptor.sources || []
+    for (var i=0;i<descriptors.length;i++){
+      var descriptor = descriptors[i]
+      if (descriptor.node && typeof sources[descriptor.node] === 'function'){
+        var source = sources[descriptor.node](this.context)
+        var event = {from: at, node: source, modulators: [], descriptor: {}, nodeIndex: i}
 
-      updateParams(this._context, event, descriptor)
-      var offTime = source.start(at)
+        source.onended = handlePlayerEnd.bind(this, event)
 
-      for (var x=0;x<event.modulators.length;x++){
-        var modulator = event.modulators[x]
-        modulator.start(at)
-      }
-
-      source.connect(this._pre)
-
-      if (offTime){
-        event.to = offTime
-        source.stop(offTime)
+        updateParams(this.context, event, descriptor)
+        var offTime = source.start(at)
 
         for (var x=0;x<event.modulators.length;x++){
           var modulator = event.modulators[x]
-          modulator.stop(offTime, true)
+          modulator.start(at)
         }
-      }
 
-      this._active.push(event)
-    } 
-  }
+        source.connect(this._pre)
 
-  startProcessorModulators(this, at)
-  triggerInput(this, at, true)
-}
+        if (offTime){
+          event.to = offTime
+          source.stop(offTime)
 
-function triggerOff(at){
-
-  at = stopProcessorModulators(this, at)
-  triggerInput(this, at, false)
-
-  var active = this._active
-  for (var i=0;i<active.length;i++){
-    var event = active[i]
-    if (!event.to && at > event.from){
-      var offTime = at
-      for (var x=0;x<event.modulators.length;x++){
-        var modulator = event.modulators[x]
-        var time = modulator.stop(at)
-        if (time && time > offTime){
-          offTime = time
+          for (var x=0;x<event.modulators.length;x++){
+            var modulator = event.modulators[x]
+            modulator.stop(offTime, true)
+          }
         }
-      }
-      event.to = event.node.stop(offTime) || offTime
+
+        this._active.push(event)
+      } 
     }
-  }
 
-}
+    startProcessorModulators(this, at)
+    triggerInput(this, at, true)
+  },
 
-function choke(at){
-  var active = this._active
-  for (var i=0;i<active.length;i++){
-    var event = active[i]
-    if (!event.choked && (!event.to || at < event.to+0.01) && at > event.from){
-      var choker = this._context.createGain()
-      event.node.disconnect()
-      event.node.connect(choker)
-      choker.connect(this._pre)
-      choker.gain.setTargetAtTime(0, at, 0.01)
-      event.choked = true
-    }
-  }
-}
-
-function update(descriptor){
-
-  var sourceDescriptors = descriptor.sources || []
-  var active = this._active
-  for (var i=0;i<active.length;i++){
-    var event = active[i]
-    if (~event.nodeIndex){
-      updateParams(this._context, event, sourceDescriptors[event.nodeIndex])
-    }
-  }
-
-
-  // prime sources (preload samples, etc)
-  if (descriptor.sources){
-    for (var i=0;i<descriptor.sources.length;i++){
-      var desc = descriptor.sources[i]
-      if (desc.node){
-        var source = this._context.sources[desc.node]
-        if (source && source.prime){
-          source.prime(this._context, desc)
+  triggerOff: function triggerOff(at){
+    at = stopProcessorModulators(this, at)
+    triggerInput(this, at, false)
+    var active = this._active
+    for (var i=0;i<active.length;i++){
+      var event = active[i]
+      if (!event.to && at > event.from){
+        var offTime = at
+        for (var x=0;x<event.modulators.length;x++){
+          var modulator = event.modulators[x]
+          var time = modulator.stop(at)
+          if (time && time > offTime){
+            offTime = time
+          }
         }
+        event.to = event.node.stop(offTime) || offTime
       }
     }
+  },
+
+  choke: function(at){
+    var active = this._active
+    for (var i=0;i<active.length;i++){
+      var event = active[i]
+      if (!event.choked && (!event.to || at < event.to+0.01) && at > event.from){
+        var choker = this.context.createGain()
+        event.node.disconnect()
+        event.node.connect(choker)
+        choker.connect(this._pre)
+        choker.gain.setTargetAtTime(0, at, 0.01)
+        event.choked = true
+      }
+    }
+  },
+
+  update: function(descriptor){
+
+    var sourceDescriptors = descriptor.sources || []
+    var active = this._active
+    for (var i=0;i<active.length;i++){
+      var event = active[i]
+      if (~event.nodeIndex){
+        updateParams(this.context, event, sourceDescriptors[event.nodeIndex])
+      }
+    }
+
+
+    // prime sources (preload samples, etc)
+    if (descriptor.sources){
+      for (var i=0;i<descriptor.sources.length;i++){
+        var desc = descriptor.sources[i]
+        if (desc.node){
+          var source = this.context.sources[desc.node]
+          if (source && source.prime){
+            source.prime(this.context, desc)
+          }
+        }
+      }
+    }
+
+    updateProcessors(this, descriptor.processors)
+    updateInput(this, descriptor)
+
+    updateParams(this.context, this._outputContainer, {gain: descriptor.volume})
+
+    this.chokeGroup = descriptor.chokeGroup == null ? null : descriptor.chokeGroup
+    this.descriptor = descriptor
+  },
+
+  connect: function(destination){
+    this.output.connect.apply(this.output, arguments)
+  },
+
+  disconnect: function(){
+    this.output.disconnect.apply(this.output, arguments)
   }
-
-  updateProcessors(this, descriptor.processors)
-  updateInput(this, descriptor)
-
-  updateParams(this._context, this._outputContainer, {gain: descriptor.volume})
-
-  this.chokeGroup = descriptor.chokeGroup == null ? null : descriptor.chokeGroup
-  this.descriptor = descriptor
 }
-
 
 ///////////////////
 
