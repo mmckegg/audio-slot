@@ -1,7 +1,7 @@
 {
   "name": "audio-slot",
   "version": "2.0.0",
-  "description": "Web Audio API triggerable audio slot described with JSON consisting of sources, processors, and modulators.",
+  "description": "Web Audio API FRP wrapper for creating, routing, and triggering AudioNodes.",
   "main": "index.js",
   "scripts": {
     "example": "beefy example.js"
@@ -11,7 +11,12 @@
     "url": "https://github.com/mmckegg/audio-slot.git"
   },
   "dependencies": {
-    "deep-equal": "~0.2.1"
+    "array-union": "^1.0.1",
+    "deep-equal": "~0.2.1",
+    "next-tick": "^0.2.2",
+    "observ": "^0.2.0",
+    "observ-node-array": "^1.3.0",
+    "observ-struct": "^6.0.0"
   },
   "devDependencies": {
     "adsr": "*",
@@ -21,7 +26,8 @@
     "soundbank-sample": "*"
   },
   "keywords": [
-    "soundbank",
+    "frp",
+    "observ",
     "waapi",
     "AudioNode",
     "modulator",
