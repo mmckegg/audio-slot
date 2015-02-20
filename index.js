@@ -2,6 +2,7 @@ var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var NodeArray = require('observ-node-array')
 var nextTick = require('next-tick')
+var Prop = require('./prop.js')
 
 module.exports = AudioSlot
 
@@ -30,7 +31,7 @@ function AudioSlot(parentContext){
     sources: NodeArray(context),
     processors: NodeArray(context),
     output: Observ(),
-    volume: Observ(1)
+    volume: Prop(1)
   })
 
   obs._type = 'AudioSlot'
