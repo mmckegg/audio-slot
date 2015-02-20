@@ -30,12 +30,14 @@ function AudioSlot(parentContext){
     id: Observ(),
     sources: NodeArray(context),
     processors: NodeArray(context),
+    noteOffset: Prop(0),
     output: Observ(),
     volume: Prop(1)
   })
 
   obs._type = 'AudioSlot'
   obs.context = context
+  context.noteOffset = obs.noteOffset
 
   obs.volume(function(value){
     output.gain.value = value
