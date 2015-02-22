@@ -27,7 +27,7 @@ function OscillatorNode(context){
 
   oscillator.start()
 
-  context.scheduler.on('data', onSchedule)
+  var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
 
   var obs = ObservStruct({
     amp: Param(context, 1),
@@ -111,8 +111,8 @@ function OscillatorNode(context){
 
   obs.destroy = function(){
     releaseNoteOffset&&releaseNoteOffset()
-    releaseNoteOffset = null
-    context.scheduler.removeListener('data', onSchedule)
+    releaseSchedule&&releaseSchedule()
+    releaseSchedule = releaseNoteOffset = null
   }
 
   obs.connect = output.connect.bind(output)
@@ -122,7 +122,7 @@ function OscillatorNode(context){
 
   //
 
-  function onSchedule(schedule){
+  function handleSchedule(schedule){
     if (maxTime && context.audio.currentTime > maxTime){
       maxTime = null
       choker.disconnect()
