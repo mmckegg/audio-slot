@@ -1,12 +1,14 @@
 var Observ = require('observ')
-var computed = require('observ/computed')
 var watch = require('observ/watch')
+var computed = require('observ/computed')
 
 var ObservStruct = require('observ-struct')
 var Transform = require('../transform.js')
 var Node = require('observ-node-array/single')
 var Param = require('../param.js')
 var Prop = require('../prop.js')
+
+var ResolvedValue = require('../resolved-value')
 
 module.exports = SampleNode
 
@@ -26,6 +28,8 @@ function SampleNode(context){
 
   })
 
+  obs.resolvedBuffer = ResolvedValue(obs.buffer)
+
   var releaseNoteOffset = null
   var globalOffset = Prop(0)
   if (context.noteOffset){
@@ -37,7 +41,7 @@ function SampleNode(context){
   var player = null
   var choker = null
   var amp = null
-  
+
   var releaseAmp = null
   var releaseRate = null
   var playTo = false
@@ -52,7 +56,7 @@ function SampleNode(context){
   ]
 
   obs.offset(function(value){
-    var buffer = getBuffer()
+    var buffer = obs.resolvedBuffer()
     if (buffer && player && Array.isArray(value)){
       player.loopStart = buffer.duration * value[0]
       player.loopEnd = buffer.duration * value[1]
@@ -70,7 +74,7 @@ function SampleNode(context){
     obs.choke(at)
 
     var mode = obs.mode()
-    var buffer = getBuffer()
+    var buffer = obs.resolvedBuffer()
  
     if (buffer instanceof AudioBuffer){
       playTo = null
@@ -135,10 +139,6 @@ function SampleNode(context){
   return obs
 
   // scoped
-
-  function getBuffer(){
-    return obs.buffer.node && typeof obs.buffer.node.resolved === 'function' && obs.buffer.node.resolved()
-  }
 
   function stop(at){
     if (!playTo && player){
