@@ -74,7 +74,7 @@ Param.triggerOn = function(obj, at){
 Param.triggerOff = function(obj, stopAt){
   for (var k in obj){
     if (obj[k] && obj[k].triggerOff){
-      var release = obj[k].getReleaseDuration() || 0
+      var release = obj[k].getReleaseDuration && obj[k].getReleaseDuration() || 0
       obj[k].triggerOff(stopAt-release)
     }
   }
