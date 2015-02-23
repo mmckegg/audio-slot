@@ -32,8 +32,8 @@ function GranularNode(context){
     hold: Prop(1),
     release: Prop(0.1),
 
-    transpose: Prop(0),
-    tune: Prop(0),
+    transpose: Param(context, 0),
+    tune: Param(context, 0),
     amp: Param(context, 1)
   })
 
@@ -46,6 +46,12 @@ function GranularNode(context){
   if (context.noteOffset){
     releaseNoteOffset = watch(context.noteOffset, globalOffset.set)
   }
+
+  var playbackRate = Transform(context, [ 1,
+    { param: globalOffset, transform: noteOffsetToRate },
+    { param: obs.transpose, transform: noteOffsetToRate },
+    { param: obs.tune, transform: centsToRate }
+  ])
 
   obs.resolvedBuffer = ResolvedValue(obs.buffer)
 
@@ -193,7 +199,7 @@ function GranularNode(context){
       var maxTime = (event && event.end || Infinity) - release
       var releaseAt = Math.min(at + grainDuration * obs.hold(), maxTime)
 
-      source.playbackRate.value = multiplyTranspose(obs.transpose() + (obs.tune() / 100) + globalOffset())
+      source.playbackRate.value = playbackRate.getValueAt(at)
 
       if (obs.mode() !== 'oneshot' && releaseAt + release > startOffset * duration){
         source.loop = true
@@ -244,6 +250,10 @@ function disconnectSelf(){
   this.disconnect()
 }
 
-function multiplyTranspose(value){
-  return Math.pow(2, value / 12)
+function noteOffsetToRate(baseRate, value){
+  return baseRate * Math.pow(2, value / 12)
+}
+
+function centsToRate(baseRate, value){
+  return baseRate * Math.pow(2, value / 1200)
 }
