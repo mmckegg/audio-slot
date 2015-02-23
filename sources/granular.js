@@ -3,10 +3,12 @@ var computed = require('observ/computed')
 var watch = require('observ/watch')
 
 var ObservStruct = require('observ-struct')
-var Transform = require('../transform.js')
 var Node = require('observ-node-array/single')
 var Param = require('../param.js')
 var Prop = require('../prop.js')
+
+var Transform = require('../modulators/transform.js')
+var Apply = require('../modulators/apply.js')
 
 var ResolvedValue = require('../resolved-value')
 
@@ -35,7 +37,7 @@ function GranularNode(context){
     amp: Param(context, 1)
   })
 
-  Transform(context, output.gain, [ obs.amp ])
+  Apply(context, output.gain, obs.amp)
 
   obs.context = context
 

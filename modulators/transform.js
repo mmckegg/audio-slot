@@ -1,6 +1,9 @@
-module.exports = ParamTransform
+var Event = require('geval')
+var interpolate = require('./interpolate.js')
 
-function ParamTransform(context, target, params, onSchedule){
+module.exports = ModulatorTransform
+
+function ModulatorTransform(context, params){
 
   var releases = []
   var channels = []
@@ -40,20 +43,28 @@ function ParamTransform(context, target, params, onSchedule){
     }
   })
 
-  target.setValueAtTime(getValueAt(context.audio.currentTime), context.audio.currentTime)
+  var broadcast = null
 
-  return function release(){
-    while (releases.length){
-      releases.pop()()
+  return {
+    onSchedule: Event(function(b){
+      broadcast = b
+    }),
+
+    getValueAt: function(time){
+      return getValueAt(time)
+    },
+
+    destroy: function(){
+      while (releases.length){
+        releases.pop()()
+      }
     }
   }
 
+
   // scoped
 
-  var maxSchedule = 0
-
   function schedule(index, descriptor){
-
     if (!(descriptor instanceof Object)){
       descriptor = { value: descriptor, at: context.audio.currentTime }
     }
@@ -61,56 +72,33 @@ function ParamTransform(context, target, params, onSchedule){
     var toTime = descriptor.at + (descriptor.duration || 0)
     lastValues[index] = descriptor.value
 
-    onSchedule&&onSchedule(toTime)
-
-    var fromValue = getValueAt(descriptor.at)
-
     descriptor.fromValue = descriptor.fromValue != null ? 
       descriptor.fromValue : 
       getChannelValueAt(index, descriptor.at)
 
+    truncate(index, descriptor.at)
+    channels[index].push(descriptor)
 
-    if (descriptor.duration){
-
-      if (maxSchedule > descriptor.at){
-        target.cancelScheduledValues(descriptor.at)
-        maxSchedule = descriptor.at
-      }
-
-      if (isRampingAt(descriptor.at)){
-        target.setValueAtTime(fromValue, descriptor.at)
-      }
-
-      truncate(index, descriptor.at)
-      channels[index].push(descriptor)
-
-      var targetValue = getValueAt(toTime)
-
-      if (descriptor.mode === 'exp'){
-        target.exponentialRampToValueAtTime(targetValue, toTime)
-      } else if (descriptor.mode === 'log'){
-        target.setTargetAtTime(targetValue, descriptor.at, descriptor.duration / 8)
-      } else {
-        target.linearRampToValueAtTime(targetValue, toTime)
-      }
-    } else if (descriptor.mode !== 'init' || !maxSchedule) {
-      truncate(index, descriptor.at)
-      channels[index].push(descriptor)
-      var targetValue = getValueAt(descriptor.at)
-
-      target.cancelScheduledValues(descriptor.at)
-      target.setValueAtTime(targetValue, descriptor.at)
-      maxSchedule = descriptor.at
+    if (!isFinite(getValueAt(toTime))){
+      debugger
+      getValueAt(toTime)
     }
 
-    if (maxSchedule < toTime){
-      maxSchedule = toTime
-    }
+    broadcast({
+      at: descriptor.at,
+      mode: descriptor.mode,
+      value: getValueAt(toTime),
+      duration: descriptor.duration
+    })
 
     var endTime = getEndTime()
     if (endTime > toTime){
-      var endValue = getValueAt(endTime)
-      target.linearRampToValueAtTime(endValue, endTime)
+      broadcast({
+        at: toTime,
+        //mode: descriptor.mode,
+        value: getValueAt(endTime),
+        duration: endTime - toTime
+      })
     }
   }
 
@@ -142,9 +130,12 @@ function ParamTransform(context, target, params, onSchedule){
   }
 
   function getValueAt(time){
-    var lastValue = target.defaultValue
+    var lastValue = 1
+
     for (var i=0;i<params.length;i++){
       var value = getChannelValueAt(i, time)
+      getChannelValueAt(i, time)
+
       if (transforms[i]){
         lastValue = transforms[i](lastValue, value)
       } else {
@@ -169,45 +160,5 @@ function ParamTransform(context, target, params, onSchedule){
     }
 
     return lastValues[index]
-  }
-
-  function isRampingAt(time){
-    for (var i=0;i<params.length;i++){
-      if (channelIsRampingAt(i, time)){
-        return true
-      }
-    }
-    return false
-  }
-
-  function channelIsRampingAt(index, time){
-    var events = channels[index]
-    if (events){
-      for (var i=0;i<events.length;i++){
-        if (event.at >= time && (event.at + event.duration||0) <= time){
-          return event.duration && event.mode !== 'log'
-        }
-      }
-    }
-    return false
-  }
-}
-
-function interpolate(event, time){
-  var to = event.at + (event.duration||0)
-  if (time < event.at){
-    return event.fromValue
-  } else if (event.duration && time <= to){
-    var range = event.value - event.fromValue
-    var pos = (time - event.at) / event.duration
-    if (event.mode === 'exp'){
-      return event.fromValue + (range * (Math.pow(pos, 2)))
-    } else if (event.mode === 'log'){
-      return event.fromValue + (range * (Math.pow(pos, 1/4)))
-    } else {
-      return event.fromValue + (range * pos)
-    }
-  } else {
-    return event.value
   }
 }

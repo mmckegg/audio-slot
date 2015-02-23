@@ -3,7 +3,10 @@ var computed = require('observ/computed')
 var watch = require('observ/watch')
 
 var ObservStruct = require('observ-struct')
-var Transform = require('../transform.js')
+
+var Transform = require('../modulators/transform.js')
+var Apply = require('../modulators/apply.js')
+
 var Param = require('../param.js')
 var Prop = require('../prop.js')
 
@@ -50,23 +53,21 @@ function OscillatorNode(context){
 
   obs.context = context
 
-  Transform(context, amp.gain, [ obs.amp ])
-  Transform(context, oscillator.detune, [ obs.detune ])
+  Apply(context, amp.gain, obs.amp)
+  Apply(context, oscillator.detune, obs.detune)
 
-  // main frequency
-  Transform(context, oscillator.frequency, [ 
+  var frequency = Transform(context, [ 440,
     { param: obs.octave, transform: transformOctave },
     { param: obs.noteOffset, transform: transformNote },
     { param: globalOffset, transform: transformNote } 
   ])
 
-  // power rolloff
-  Transform(context, power.gain, [ 440,
-    { param: obs.octave, transform: transformOctave },
-    { param: obs.noteOffset, transform: transformNote },
-    { param: globalOffset, transform: transformNote },
-    { transform: frequencyToPowerRolloff }
+  var powerRolloff = Transform(context, [
+    { param: frequency, transform: frequencyToPowerRolloff }
   ])
+
+  Apply(context, oscillator.frequency, frequency)
+  Apply(context, power.gain, powerRolloff)
 
   obs.shape(function(shape){
     oscillator.type = shape
@@ -148,6 +149,6 @@ function transformNote(baseFrequency, value){
   return baseFrequency * Math.pow(2, value / 12)
 }
 
-function frequencyToPowerRolloff(value){
+function frequencyToPowerRolloff(baseValue, value){
   return 1 - ((value / 20000) || 0)
 }

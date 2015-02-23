@@ -3,10 +3,12 @@ var watch = require('observ/watch')
 var computed = require('observ/computed')
 
 var ObservStruct = require('observ-struct')
-var Transform = require('../transform.js')
 var Node = require('observ-node-array/single')
 var Param = require('../param.js')
 var Prop = require('../prop.js')
+
+var Transform = require('../modulators/transform.js')
+var Apply = require('../modulators/apply.js')
 
 var ResolvedValue = require('../resolved-value')
 
@@ -49,11 +51,11 @@ function SampleNode(context){
   var triggerOnRelease = false
   var isOneshot = false
 
-  var rateTransforms = [
+  var playbackRate = Transform(context, [ 1,
     { param: globalOffset, transform: noteOffsetToRate },
     { param: obs.transpose, transform: noteOffsetToRate },
-    { param: obs.tune, transform: centsToRate },
-  ]
+    { param: obs.tune, transform: centsToRate }
+  ])
 
   obs.offset(function(value){
     var buffer = obs.resolvedBuffer()
@@ -82,8 +84,8 @@ function SampleNode(context){
       amp = context.audio.createGain()
       player = context.audio.createBufferSource()
 
-      releaseAmp = Transform(context, amp.gain, [ obs.amp ])
-      releaseRate = Transform(context, player.playbackRate, rateTransforms)
+      releaseAmp = Apply(context, amp.gain, obs.amp)
+      releaseRate = Apply(context, player.playbackRate, playbackRate)
 
       player.connect(amp)
       amp.connect(choker)
