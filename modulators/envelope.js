@@ -24,7 +24,7 @@ function Envelope(context){
   obs.context = context
 
   obs.triggerOn = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at||context.audio.currentTime
 
     var peakTime = at + (obs.attack() || 0.005)
 
@@ -51,7 +51,7 @@ function Envelope(context){
   }
 
   obs.triggerOff = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at||context.audio.currentTime
 
     // release
     broadcast({ 

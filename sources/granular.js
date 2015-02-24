@@ -54,7 +54,7 @@ function GranularNode(context){
   var lastBeatDuration = 1
 
   obs.choke = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
     var event = eventAt(at-0.02)
     if (event){
       var stopAt = at+(0.02*6)
@@ -86,7 +86,7 @@ function GranularNode(context){
       event.end = stopAt
     }
 
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
     truncate(at)
 
     Param.triggerOn(obs, at)
@@ -99,7 +99,7 @@ function GranularNode(context){
   }
 
   obs.triggerOff = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
     var event = eventAt(at)
     if (event && !event.oneshot){
       var stopAt = obs.getReleaseDuration() + at

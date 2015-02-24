@@ -30,7 +30,7 @@ function ValueModulator(context){
   var lastTriggerOff = 0
 
   obs.triggerOn = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
     lastTriggerOn = at
 
     Param.triggerOn(obs, at)
@@ -41,7 +41,7 @@ function ValueModulator(context){
   }
 
   obs.triggerOff = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
 
     var stopAt = obs.getReleaseDuration() + at
     Param.triggerOff(obs, stopAt)

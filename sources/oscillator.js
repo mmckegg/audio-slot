@@ -71,7 +71,7 @@ function OscillatorNode(context){
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
 
   obs.triggerOn = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
     choker.connect(output)
     choker.gain.cancelScheduledValues(at)
     choker.gain.setValueAtTime(1, at)
@@ -88,7 +88,7 @@ function OscillatorNode(context){
   }
 
   obs.triggerOff = function(at){
-    at = Math.max(at||0, context.audio.currentTime)
+    at = at || context.audio.currentTime
     var stopAt = obs.getReleaseDuration() + at
 
     // stop modulators

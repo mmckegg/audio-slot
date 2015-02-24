@@ -51,7 +51,7 @@ module.exports = function(ctor){
     nextTick(prepare)
 
     obs.choke = function(at){
-      at = Math.max(context.audio.currentTime, at || 0)
+      at = at || context.audio.currentTime
       for (var i=active.length-1;i>=0;i--){
         if (active[i][2] && active[i][2] < at){
           active[i][1].gain.setTargetAtTime(0, at, 0.01)
@@ -66,7 +66,7 @@ module.exports = function(ctor){
       var next = future.pop() || generateFuture()
       var node = next[0]
 
-      at = Math.max(context.audio.currentTime, at || 0)
+      at = at || context.audio.currentTime
       obs.choke(at)
 
       var stopAt = node.start(at)
@@ -114,7 +114,7 @@ module.exports = function(ctor){
 
     obs.triggerOff = function(at){
 
-      at = Math.max(context.audio.currentTime, at || 0)
+      at = at || context.audio.currentTime
 
       var maxDuration = obs.getReleaseDuration()
 

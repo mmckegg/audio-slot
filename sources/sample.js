@@ -113,7 +113,7 @@ function SampleNode(context){
     if (isOneshot){
       isOneshot = false
     } else {
-      at = Math.max(at||0, context.audio.currentTime)
+      at = at || context.audio.currentTime
       var stopAt = obs.getReleaseDuration() + at
 
       if (triggerOnRelease){
