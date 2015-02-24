@@ -8,8 +8,6 @@ module.exports = Envelope
 
 function Envelope(context){
 
-  var targets = []
-
   var obs = ObservStruct({
     attack: Prop(0),
     decay: Prop(0),
