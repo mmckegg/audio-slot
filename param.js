@@ -23,6 +23,8 @@ function Param(context, defaultValue){
     return getValue(obs(), defaultValue)
   }
 
+  obs.context = context
+
   if (defaultValue != null){
     set(defaultValue)
   }
