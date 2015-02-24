@@ -19,6 +19,14 @@ function Param(context, defaultValue){
     }
   }
 
+  obs.getValueAt = function(at){
+    if (obs.node && node.getValueAt){
+      return node.getValueAt(at)
+    } else {
+      return obs.getValue()
+    }
+  }
+
   obs.getValue = function(){
     return getValue(obs(), defaultValue)
   }

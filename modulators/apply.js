@@ -15,8 +15,6 @@ function ApplyParam(context, target, param){
 
     if (param.getValueAt){
       lastValue = param.getValueAt(currentTime)
-    } else if (param.getValue){
-      lastValue = param.getValue()
     }
 
   } else if (typeof param === 'function'){

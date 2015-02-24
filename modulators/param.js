@@ -2,6 +2,7 @@ var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var Param = require('../param.js')
 var Event = require('geval')
+var nextTick = require('next-tick')
 
 var Transform = require('./transform.js')
 
@@ -27,9 +28,9 @@ function ParamModulator(context){
     onSchedule: Event(function(broadcast){
       handleSchedule = broadcast
     }),
-    getValue: function(){
+    getValueAt: function(at){
       if (currentParam && currentParam.getValueAt){
-        return currentParam.getValueAt(context.audio.currentTime)
+        return currentParam.getValueAt(at)
       } else {
         return 0
       }
@@ -48,6 +49,10 @@ function ParamModulator(context){
     releaseParams = context.paramLookup(handleUpdate)
   }
 
+  obs.param(handleUpdate)
+
+  nextTick(transformedValue.resend)
+
   obs.destroy = function(){
     releaseParams&&releaseParams()
     releaseSchedule&&releaseSchedule()
@@ -63,12 +68,10 @@ function ParamModulator(context){
     if (currentParam !== param){
       releaseSchedule&&releaseSchedule()
       releaseSchedule = null
+      if (param){
+        releaseSchedule = param.onSchedule(handleSchedule)
+      }
     }
-
-    if (param){
-      releaseSchedule = param.onSchedule(handleSchedule)
-    }
-
     currentParam = param
   }
 

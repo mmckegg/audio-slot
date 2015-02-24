@@ -28,9 +28,8 @@ function ModulatorTransform(context, params){
       } else if (typeof param === 'function') {
         releases.push(param(schedule.bind(this, i)))
       }
-
-      if (param.getValue){
-        lastValues[i] = param.getValue()
+      if (param.getValueAt){
+        lastValues[i] = param.getValueAt(context.audio.currentTime)
       } else if (typeof param === 'function') {
         lastValues[i] = param()
       }
@@ -54,6 +53,13 @@ function ModulatorTransform(context, params){
 
     getValueAt: function(time){
       return getValueAt(time)
+    },
+
+    resend: function(){
+      broadcast({
+        value: getValueAt(context.audio.currentTime),
+        at: context.audio.currentTime
+      })
     },
 
     destroy: function(){
