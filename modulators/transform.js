@@ -9,6 +9,7 @@ function ModulatorTransform(context, params){
   var channels = []
   var transforms = []
   var lastValues = []
+  var interpolateChannel = []
 
   params.forEach(function(container, i){
     if (container.onSchedule){
@@ -23,6 +24,7 @@ function ModulatorTransform(context, params){
       
       if (param.onSchedule){
         releases.push(param.onSchedule(schedule.bind(this, i)))
+        interpolateChannel[i] = true
       } else if (typeof param === 'function') {
         releases.push(param(schedule.bind(this, i)))
       }
@@ -34,7 +36,7 @@ function ModulatorTransform(context, params){
       }
 
       channels[i] = []
-    } else if (container.value){
+    } else if (container.value != null){
       lastValues[i] = container.value
     }
 
@@ -65,7 +67,7 @@ function ModulatorTransform(context, params){
   // scoped
 
   function schedule(index, descriptor){
-    if (!(descriptor instanceof Object)){
+    if (!interpolateChannel[index]){
       descriptor = { value: descriptor, at: context.audio.currentTime }
     }
 
@@ -78,11 +80,6 @@ function ModulatorTransform(context, params){
 
     truncate(index, descriptor.at)
     channels[index].push(descriptor)
-
-    if (!isFinite(getValueAt(toTime))){
-      debugger
-      getValueAt(toTime)
-    }
 
     broadcast({
       at: descriptor.at,
@@ -134,12 +131,19 @@ function ModulatorTransform(context, params){
 
     for (var i=0;i<params.length;i++){
       var value = getChannelValueAt(i, time)
-      getChannelValueAt(i, time)
+
+      var l = lastValue
 
       if (transforms[i]){
         lastValue = transforms[i](lastValue, value)
       } else {
         lastValue = value
+      }
+
+      if (typeof lastValue == 'number' && isNaN(lastValue)){
+        debugger
+        getChannelValueAt(i, time)
+        transforms[i](l, value)
       }
     }
 
@@ -153,8 +157,13 @@ function ModulatorTransform(context, params){
       for (var i=0;i<events.length;i++){
         var event = events[i]
         var next = events[i+1]
+
         if (!next || next.at > time){
-          return interpolate(event, time)
+          if (interpolateChannel[index]){
+            return interpolate(event, time)
+          } else {
+            return event.value
+          }
         }
       }
     }
