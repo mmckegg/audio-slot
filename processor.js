@@ -20,7 +20,7 @@ function ProcessorNode(context, input, output, params){
 
   obs.triggerOff = function(at){
     at = Math.max(at||0, context.audio.currentTime)
-    var stopAt = obs.getReleaseDuration(at)
+    var stopAt = obs.getReleaseDuration(at) + at
     Param.triggerOff(obs, stopAt)
   }
 
