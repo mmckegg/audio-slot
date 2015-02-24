@@ -5,7 +5,7 @@ var computed = require('observ/computed')
 var ObservStruct = require('observ-struct')
 var Node = require('observ-node-array/single')
 var Param = require('../param.js')
-var Prop = require('../prop.js')
+var Property = require('../property.js')
 
 var Transform = require('../modulators/transform.js')
 var Apply = require('../modulators/apply.js')
@@ -20,8 +20,8 @@ function SampleNode(context){
 
   var obs = ObservStruct({
 
-    mode: Prop('hold'),
-    offset: Prop([0,1]),
+    mode: Property('hold'),
+    offset: Property([0,1]),
     buffer: Node(context),
 
     amp: Param(context, 1),

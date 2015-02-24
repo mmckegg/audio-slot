@@ -8,7 +8,7 @@ var Transform = require('../modulators/transform.js')
 var Apply = require('../modulators/apply.js')
 
 var Param = require('../param.js')
-var Prop = require('../prop.js')
+var Property = require('../property.js')
 
 module.exports = OscillatorNode
 
@@ -37,7 +37,7 @@ function OscillatorNode(context){
     noteOffset: Param(context, 0),
     octave: Param(context, 0),
     detune: Param(context, 0),
-    shape: Prop('sine') //Param(context, multiplier.gain, 1)
+    shape: Property('sine') //Param(context, multiplier.gain, 1)
   })
 
 

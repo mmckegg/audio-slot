@@ -5,7 +5,7 @@ var watch = require('observ/watch')
 var ObservStruct = require('observ-struct')
 var Node = require('observ-node-array/single')
 var Param = require('../param.js')
-var Prop = require('../prop.js')
+var Property = require('../property.js')
 
 var Transform = require('../modulators/transform.js')
 var Apply = require('../modulators/apply.js')
@@ -20,17 +20,17 @@ function GranularNode(context){
   var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
 
   var obs = ObservStruct({
-    mode: Prop('loop'),
-    sync: Prop(false),
-    offset: Prop([0,1]),
+    mode: Property('loop'),
+    sync: Property(false),
+    offset: Property([0,1]),
     buffer: Node(context),
 
-    duration: Prop(1),
-    rate: Prop(8),
+    duration: Property(1),
+    rate: Property(8),
 
-    attack: Prop(0.1),
-    hold: Prop(1),
-    release: Prop(0.1),
+    attack: Property(0.1),
+    hold: Property(1),
+    release: Property(0.1),
 
     transpose: Param(context, 0),
     tune: Param(context, 0),

@@ -1,7 +1,7 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var Param = require('../param.js')
-var Prop = require('../prop.js')
+var Property = require('../property.js')
 var Event = require('geval')
 
 module.exports = Envelope
@@ -9,11 +9,11 @@ module.exports = Envelope
 function Envelope(context){
 
   var obs = ObservStruct({
-    attack: Prop(0),
-    decay: Prop(0),
-    sustain: Prop(1),
-    release: Prop(0),
-    value: Prop(1) //Param(context, multiplier.gain, 1)
+    attack: Property(0),
+    decay: Property(0),
+    sustain: Property(1),
+    release: Property(0),
+    value: Property(1) //Param(context, multiplier.gain, 1)
   })
 
   var broadcast = null

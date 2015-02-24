@@ -1,7 +1,6 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var Param = require('../param.js')
-var Prop = require('../prop.js')
 var Event = require('geval')
 
 module.exports = ValueModulator

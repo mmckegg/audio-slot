@@ -1,6 +1,6 @@
 var ObservStruct = require('observ-struct')
 var Param = require('../param.js')
-var Prop = require('../prop.js')
+var Property = require('../property.js')
 var Transform = require('./transform.js')
 
 module.exports = ScaleModulator
@@ -14,7 +14,7 @@ function ScaleModulator(context){
   var obs = ObservStruct({
     value: Param(context, 0),
     offset: Param(context, 0),
-    scale: Prop(defaultScale)
+    scale: Property(defaultScale)
   })
 
   var transformedValue = Transform(context, [
