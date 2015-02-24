@@ -41,21 +41,13 @@ function GranularNode(context){
 
   obs.context = context
 
-  var releaseNoteOffset = null
-  var globalOffset = Prop(0)
-  if (context.noteOffset){
-    releaseNoteOffset = watch(context.noteOffset, globalOffset.set)
-  }
-
   var playbackRate = Transform(context, [ 1,
-    { param: globalOffset, transform: noteOffsetToRate },
+    { param: context.noteOffset, transform: noteOffsetToRate },
     { param: obs.transpose, transform: noteOffsetToRate },
     { param: obs.tune, transform: centsToRate }
   ])
 
   obs.resolvedBuffer = ResolvedValue(obs.buffer)
-
-  
 
   var active = []
   var scheduledTo = 0
@@ -118,9 +110,12 @@ function GranularNode(context){
   }
 
   obs.destroy = function(){
+    
+    // release context.noteOffset
+    playbackRate.destroy() 
+
     releaseSchedule&&releaseSchedule()
-    releaseNoteOffset&&releaseNoteOffset()
-    releaseSchedule = releaseNoteOffset = null
+    releaseSchedule  = null
   }
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)

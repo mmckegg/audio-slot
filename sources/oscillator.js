@@ -45,11 +45,6 @@ function OscillatorNode(context){
   var lastOn = -1
   var lastOff = 0
   var hasTriggered = false
-  var releaseNoteOffset = null
-  var globalOffset = Prop(0)
-  if (context.noteOffset){
-    releaseNoteOffset = watch(context.noteOffset, globalOffset.set)
-  }
 
   obs.context = context
 
@@ -59,7 +54,7 @@ function OscillatorNode(context){
   var frequency = Transform(context, [ 440,
     { param: obs.octave, transform: transformOctave },
     { param: obs.noteOffset, transform: transformNote },
-    { param: globalOffset, transform: transformNote } 
+    { param: context.noteOffset, transform: transformNote }
   ])
 
   var powerRolloff = Transform(context, [
@@ -97,7 +92,7 @@ function OscillatorNode(context){
     var stopAt = obs.getReleaseDuration() + at
 
     // stop modulators
-    Param.triggerOff(obs, at)
+    Param.triggerOff(obs, stopAt)
 
     choker.gain.setValueAtTime(0, stopAt)
 
@@ -111,9 +106,12 @@ function OscillatorNode(context){
   }
 
   obs.destroy = function(){
-    releaseNoteOffset&&releaseNoteOffset()
+    
+    // release context.noteOffset
+    frequency.destroy()
+
     releaseSchedule&&releaseSchedule()
-    releaseSchedule = releaseNoteOffset = null
+    releaseSchedule = null
   }
 
   obs.connect = output.connect.bind(output)

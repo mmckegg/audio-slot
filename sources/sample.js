@@ -32,12 +32,6 @@ function SampleNode(context){
 
   obs.resolvedBuffer = ResolvedValue(obs.buffer)
 
-  var releaseNoteOffset = null
-  var globalOffset = Prop(0)
-  if (context.noteOffset){
-    releaseNoteOffset = watch(context.noteOffset, globalOffset.set)
-  }
-
   obs.context = context
 
   var player = null
@@ -52,7 +46,7 @@ function SampleNode(context){
   var isOneshot = false
 
   var playbackRate = Transform(context, [ 1,
-    { param: globalOffset, transform: noteOffsetToRate },
+    { param: context.noteOffset, transform: noteOffsetToRate },
     { param: obs.transpose, transform: noteOffsetToRate },
     { param: obs.tune, transform: centsToRate }
   ])
@@ -132,6 +126,11 @@ function SampleNode(context){
       Param.triggerOff(obs, stopAt)
       stop(stopAt)
     }
+  }
+
+  obs.destroy = function(){
+    // release context.noteOffset
+    playbackRate.destroy() 
   }
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
