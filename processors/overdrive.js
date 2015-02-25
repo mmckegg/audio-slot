@@ -33,8 +33,6 @@ function OverdriveNode(context){
   waveshaper.connect(lowpass)
   lowpass.connect(output)
 
-  waveshaper.connect(output)
-
   var obs = Processor(context, input, output, {
     preBand: Param(context, 0.5),
     color: Param(context, 800),
