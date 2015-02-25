@@ -28,7 +28,11 @@ function Envelope(context){
 
     var peakTime = at + (obs.attack() || 0.005)
 
-    broadcast({ mode: 'init', value: 0, at: at })
+    if (obs.release() && obs.attack()){
+      broadcast({ mode: 'init', value: 0, at: at })
+    } else {
+      broadcast({ value: 0, at: at })
+    }
 
     if (obs.attack()){
       broadcast({ 
@@ -54,11 +58,13 @@ function Envelope(context){
     at = at||context.audio.currentTime
 
     // release
-    broadcast({ 
-      value: 0, at: at, 
-      duration: obs.release(), 
-      mode: 'log' 
-    })
+    if (obs.release()){
+      broadcast({ 
+        value: 0, at: at, 
+        duration: obs.release(), 
+        mode: 'log' 
+      })
+    }
 
     return at + obs.release()
   }
