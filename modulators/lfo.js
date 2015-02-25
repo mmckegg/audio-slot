@@ -78,7 +78,7 @@ function LFOModulator(context){
 
       broadcast({
         at: at,
-        value: 0
+        value: obs.value.getValueAt(at)
       })
 
       if (at < scheduledTo){
@@ -98,7 +98,7 @@ function LFOModulator(context){
 
       broadcast({
         at: stopAt,
-        value: 0
+        value: obs.value.getValueAt(stopAt)
       })
 
       event.end = stopAt
