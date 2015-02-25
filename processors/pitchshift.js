@@ -4,6 +4,8 @@ var Property = require('../property.js')
 var Transform = require('../modulators/transform')
 var Apply = require('../modulators/apply')
 
+var watch = require('observ/watch')
+
 module.exports = PitchshiftNode
 
 function PitchshiftNode(context){
@@ -16,10 +18,11 @@ function PitchshiftNode(context){
   var dry = context.audio.createGain()
 
   input.connect(instance.input)
+  instance.output.connect(wet)
   input.connect(dry)
 
   dry.connect(output)
-  instance.output.connect(output)
+  wet.connect(output)
 
   var obs = Processor(context, input, output, {
     transpose: Property(12),
@@ -27,7 +30,7 @@ function PitchshiftNode(context){
     dry: Param(context, 0)
   })
 
-  obs.transpose(function(value){
+  watch(obs.transpose, function(value){
     instance.setPitchOffset(getMultiplier(value))
   })
 
