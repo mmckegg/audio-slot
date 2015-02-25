@@ -206,7 +206,7 @@ function LFOModulator(context){
     } else if (mode === 'subtract'){
       return base - value
     } else {
-      return base * value
+      return value + (base * value)
     }
   }
 
