@@ -69,6 +69,7 @@ function GranularNode(context){
     var amp = context.audio.createGain()
     amp.connect(output)
 
+    var stopAt = null
     var event = {
       start: at,
       end: null,
@@ -80,7 +81,7 @@ function GranularNode(context){
     if (obs.mode() === 'oneshot'){
       event.oneshot = true
       var duration = obs.sync() ? obs.duration() * lastBeatDuration : obs.duration()
-      var stopAt = at + duration
+      stopAt = at + duration
       Param.triggerOff(obs, stopAt)
       truncate(stopAt)
       event.end = stopAt
@@ -96,6 +97,8 @@ function GranularNode(context){
     if (at < scheduledTo){
       scheduleEvent(event, at, scheduledTo, lastBeatDuration)
     }
+
+    return stopAt
   }
 
   obs.triggerOff = function(at){
@@ -204,7 +207,7 @@ function GranularNode(context){
 
       source.start(at, startOffset * duration + start)
       source.stop(releaseAt + release)
-      source.onended = disconnectSelf
+      //source.onended = disconnectSelf
 
       var envelope = context.audio.createGain()
       source.connect(envelope)
