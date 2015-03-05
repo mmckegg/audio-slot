@@ -2,6 +2,7 @@ var Processor = require('../processor.js')
 
 var Property = require('../property.js')
 var Param = require('../param.js')
+var watch = require('observ/watch')
 
 var Apply = require('../modulators/apply')
 
@@ -23,7 +24,7 @@ function DipperNode(context){
     ratio: Param(context, 1)
   })
 
-  obs.mode(function(value){
+  watch(obs.mode, function(value){
     if (value === 'source'){
       from.disconnect()
       to.connect(dipper)
@@ -38,8 +39,8 @@ function DipperNode(context){
     from.disconnect()
   }
 
-  Apply(context, input.gain, obs.ratio)
-  Apply(context, output.gain, obs.ratio)
+  Apply(context, to.gain, obs.ratio)
+  Apply(context, from.gain, obs.ratio)
 
   return obs
 }
