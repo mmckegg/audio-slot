@@ -11,6 +11,7 @@ module.exports = AudioSlot
 function AudioSlot(parentContext){
 
   var context = Object.create(parentContext)
+  var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
   var audioContext = context.audio
 
   var input = audioContext.createGain()
@@ -45,6 +46,8 @@ function AudioSlot(parentContext){
     output.gain.value = value
   })
 
+  var lastOff = null
+
   obs.input = input
 
   // main output
@@ -78,19 +81,36 @@ function AudioSlot(parentContext){
 
   obs.triggerOn = function(at){
     //HACK for testing
+    post.connect(output)
+    lastOff = null
+
+    var offTime = null
+
     obs.sources.forEach(function(source){
-      source.triggerOn(at)
+      var time = source.triggerOn(at)
+      if (time && (!offTime || time > offTime)){
+        offTime = time
+      }
     })
 
     // for processor modulators
     obs.processors.forEach(function(processor){
-      processor&&processor.triggerOn(at)
+      var time = processor&&processor.triggerOn(at)
+      if (time && (!offTime || time > offTime)){
+        offTime = time
+      }
     })
+
+    if (offTime){
+      obs.triggerOff(offTime)
+    }
   }
 
   obs.triggerOff = function(at){
     var maxDuration = 0
     var offEvents = []
+
+    var offAt = at
 
     obs.sources.forEach(function(source){
       var releaseDuration = source.getReleaseDuration && source.getReleaseDuration() || 0
@@ -114,9 +134,17 @@ function AudioSlot(parentContext){
       var releaseDuration = event[1]
 
       if (target.triggerOff){
-        target.triggerOff(at + maxDuration - releaseDuration)
+        var time = target.triggerOff(at + maxDuration - releaseDuration)
+        if (time && time > offAt){
+          offAt = time
+        }
       }
     })
+
+    var time = offAt + 5
+    if (!lastOff || time > lastOff){
+      lastOff = time
+    }
   }
 
   obs.choke = function(at){
@@ -137,6 +165,7 @@ function AudioSlot(parentContext){
 
   obs.destroy = function(){
     removeSlotWatcher()
+    releaseSchedule()
     removeSlotWatcher = null
   }
 
@@ -195,6 +224,12 @@ function AudioSlot(parentContext){
 
     updatingProcessors = false
 
+  }
+
+  function handleSchedule(){
+    if (lastOff && lastOff < audioContext.currentTime){
+      post.disconnect()
+    }
   }
 
   function checkProcessorsChanged(){
