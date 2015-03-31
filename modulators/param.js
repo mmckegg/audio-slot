@@ -12,8 +12,10 @@ function ParamModulator(context){
 
   var obs = ObservStruct({
     param: Observ(),
-    value: Param(context, 1)
+    value: Param(context, 0)
   })
+
+  obs._type = 'ParamModulator'
 
   obs.context = context
 
