@@ -13,13 +13,12 @@ var defaultScale = {
 function ScaleModulator(context){
   var obs = ObservStruct({
     value: Param(context, 0),
-    offset: Param(context, 0),
     scale: Property(defaultScale)
   })
 
   var transformedValue = Transform(context, [
     { param: obs.value },
-    { param: obs.offset, transform: add },
+    { param: context.offset, transform: add },
     { param: obs.scale, transform: applyScale }
   ])
 
