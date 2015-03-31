@@ -12,6 +12,8 @@ function ValueModulator(context){
     value: Param(context, 1)
   })
 
+  obs._type = 'ValueModulator'
+
   var broadcast = null
   obs.onSchedule = Event(function(b){
     broadcast = b
