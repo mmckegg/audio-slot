@@ -24,6 +24,7 @@ function OscillatorNode(context){
 
   oscillator.connect(power)
   choker.gain.value = 0
+  amp.gain.value = 0
 
   power.connect(amp)
   amp.connect(choker)
