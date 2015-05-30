@@ -5,17 +5,30 @@ module.exports = Param
 
 function Param(context, defaultValue){
   var obs = ObservNode(context)
+  var initial = true
+  var queued = []
+
+  process.nextTick(function() {
+    initial = false
+    queued.forEach(broadcast)
+    queued.length = 0
+  })
 
   // handle defaultValue
   var set = obs.set
   obs.set = function(v){
     set(v == null ? defaultValue : v)
     if (typeof obs() === 'number'){
-      broadcast({ 
+      var msg = { 
         type: 'set', 
         value: obs(), 
         at: context.audio.currentTime 
-      })
+      }
+      if (initial) {
+        queued.push(msg)
+      } else {
+        broadcast(msg)
+      }
     }
   }
 
