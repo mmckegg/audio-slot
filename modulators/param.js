@@ -31,7 +31,9 @@ function ParamModulator(context){
       handleSchedule = broadcast
     }),
     getValueAt: function(at){
-      if (currentParam && currentParam.getValueAt){
+      if (typeof currentParam === 'number') {
+        return currentParam
+      } else if (currentParam && currentParam.getValueAt){
         return currentParam.getValueAt(at)
       } else {
         return 0
@@ -71,7 +73,16 @@ function ParamModulator(context){
       releaseSchedule&&releaseSchedule()
       releaseSchedule = null
       if (param){
-        releaseSchedule = param.onSchedule(handleSchedule)
+        if (param.onSchedule) {
+          releaseSchedule = param.onSchedule(handleSchedule)
+        } else if (typeof param === 'function') {
+          releaseSchedule = param(function(value) {
+            handleSchedule({
+              value: value,
+              at: context.audio.currentTime
+            })
+          })
+        }
       }
     }
     currentParam = param
