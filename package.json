@@ -20,13 +20,6 @@
     "observ-node-array": "^1.3.0",
     "observ-struct": "^6.0.0"
   },
-  "devDependencies": {
-    "adsr": "*",
-    "beefy": "^2.1.1",
-    "soundbank-delay": "*",
-    "soundbank-oscillator": "*",
-    "soundbank-sample": "*"
-  },
   "keywords": [
     "frp",
     "observ",
