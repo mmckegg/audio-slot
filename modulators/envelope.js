@@ -13,7 +13,7 @@ function Envelope(context){
     decay: Property(0),
     sustain: Property(1),
     release: Property(0),
-    value: Property(1) //Param(context, multiplier.gain, 1)
+    value: Param(context, 1)
   })
 
   var broadcast = null
@@ -24,9 +24,10 @@ function Envelope(context){
   obs.context = context
 
   obs.triggerOn = function(at){
-    at = at||context.audio.currentTime
+    at = Math.max(at, context.audio.currentTime)
 
     var peakTime = at + (obs.attack() || 0.005)
+    var value = obs.value.getValueAt(at+peakTime)
 
     if (obs.release() && obs.attack()){
       broadcast({ mode: 'init', value: 0, at: at })
@@ -36,18 +37,18 @@ function Envelope(context){
 
     if (obs.attack()){
       broadcast({ 
-        value: obs.value(), 
+        value: value, 
         at: at, 
         duration: obs.attack(), 
         mode: 'log' 
       })
     } else {
-      broadcast({ value: obs.value(), at: at })
+      broadcast({ value: value, at: at })
     }
 
     // decay / sustain
     broadcast({ 
-      value: obs.sustain()*obs.value(), 
+      value: obs.sustain()*value, 
       at: peakTime, 
       duration: obs.decay(), 
       mode: 'log' 
@@ -55,7 +56,7 @@ function Envelope(context){
   }
 
   obs.triggerOff = function(at){
-    at = at||context.audio.currentTime
+    at = Math.max(at, context.audio.currentTime)
 
     // release
     if (obs.release()){
