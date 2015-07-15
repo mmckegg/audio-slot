@@ -65,8 +65,16 @@ function OscillatorNode(context){
   Apply(context, oscillator.frequency, frequency)
   Apply(context, power.gain, powerRolloff)
 
+  var lastShape = 'sine'
   obs.shape(function(shape){
-    oscillator.type = shape
+    if (shape !== lastShape) {
+      if (context.periodicWaves && context.periodicWaves[shape]) {
+        oscillator.setPeriodicWave(context.periodicWaves[shape])
+      } else {
+        oscillator.type = shape
+      }
+      lastShape = shape
+    }
   })
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
