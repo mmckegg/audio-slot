@@ -118,7 +118,7 @@ function AudioSlot(parentContext){
         maxDuration = releaseDuration
       }
 
-      offEvents.push([source, releaseDuration])
+      source.triggerOff(at)
     })
 
     obs.processors.forEach(function(processor){
