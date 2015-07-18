@@ -87,7 +87,7 @@ function ModulatorTransform(context, params){
     truncate(index, descriptor.at)
     channels[index].push(descriptor)
 
-    broadcast({
+    broadcastIfValid({
       at: descriptor.at,
       mode: descriptor.mode,
       value: getValueAt(toTime),
@@ -96,12 +96,17 @@ function ModulatorTransform(context, params){
 
     var endTime = getEndTime()
     if (endTime > toTime){
-      broadcast({
+      broadcastIfValid({
         at: toTime,
-        //mode: descriptor.mode,
         value: getValueAt(endTime),
         duration: endTime - toTime
       })
+    }
+  }
+
+  function broadcastIfValid(descriptor) {
+    if (descriptor && isFinite(descriptor.value)) {
+      broadcast(descriptor)
     }
   }
 
@@ -147,7 +152,6 @@ function ModulatorTransform(context, params){
       }
 
       if (typeof lastValue == 'number' && isNaN(lastValue)){
-        debugger
         getChannelValueAt(i, time)
         transforms[i](l, value)
       }
