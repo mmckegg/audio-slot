@@ -2,6 +2,7 @@ var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var Param = require('../param.js')
 var Property = require('../property.js')
+var Transform = require('./transform.js')
 var Event = require('geval')
 
 module.exports = Envelope
@@ -17,9 +18,22 @@ function Envelope(context){
   })
 
   var broadcast = null
-  obs.onSchedule = Event(function(b){
-    broadcast = b
-  })
+  var eventSource = {
+    onSchedule: Event(function(b){
+      broadcast = b
+    }),
+    getValueAt: function(at){
+      return 0
+    }
+  }
+
+  var outputValue = Transform(context, [
+    { param: obs.value },
+    { param: eventSource, transform: multiply }
+  ])
+
+  obs.getValueAt = outputValue.getValueAt
+  obs.onSchedule = outputValue.onSchedule
 
   obs.context = context
 
@@ -27,28 +41,22 @@ function Envelope(context){
     at = Math.max(at, context.audio.currentTime)
 
     var peakTime = at + (obs.attack() || 0.005)
-    var value = obs.value.getValueAt(at+peakTime)
-
-    if (obs.release() && obs.attack()){
-      broadcast({ mode: 'init', value: 0, at: at })
-    } else {
-      broadcast({ value: 0, at: at })
-    }
 
     if (obs.attack()){
       broadcast({ 
-        value: value, 
+        fromValue: 0,
+        value: 1, 
         at: at, 
         duration: obs.attack(), 
         mode: 'log' 
       })
     } else {
-      broadcast({ value: value, at: at })
+      broadcast({ value: 1, at: at })
     }
 
     // decay / sustain
     broadcast({ 
-      value: obs.sustain()*value, 
+      value: obs.sustain(), 
       at: peakTime, 
       duration: obs.decay(), 
       mode: 'log' 
@@ -65,6 +73,8 @@ function Envelope(context){
         duration: obs.release(), 
         mode: 'log' 
       })
+    } else {
+      broadcast({ value: 0, at: at })
     }
 
     return at + obs.release()
@@ -83,4 +93,8 @@ function getValue(start, end, fromTime, toTime, at){
   var truncateTime = at - fromTime
   var phase = truncateTime / time
   return start + phase * difference
+}
+
+function multiply (a,b) {
+  return a * b
 }
