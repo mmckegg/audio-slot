@@ -38,6 +38,9 @@ function ApplyParam(context, target, param){
     var toTime = descriptor.at + (descriptor.duration || 0)
     lastValue = descriptor.value
 
+    descriptor.at = Math.max(descriptor.at, context.audio.currentTime)
+    toTime = Math.max(toTime, context.audio.currentTime)
+
     var fromValue = getValueAt(descriptor.at)
 
     descriptor.fromValue = descriptor.fromValue != null ? 
