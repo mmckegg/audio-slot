@@ -41,6 +41,7 @@ function AudioSlot(parentContext){
   obs._type = 'AudioSlot'
   obs.context = context
   context.noteOffset = obs.noteOffset
+  context.slot = obs
 
   obs.volume(function(value){
     output.gain.value = value

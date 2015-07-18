@@ -5,7 +5,9 @@ var Event = require('geval')
 
 module.exports = ValueModulator
 
-function ValueModulator(context){
+function ValueModulator(parentContext){
+
+  var context = Object.create(parentContext)
 
   var obs = ObservStruct({
     id: Observ(),
@@ -13,6 +15,7 @@ function ValueModulator(context){
   })
 
   obs._type = 'ValueModulator'
+  context.slot = obs
 
   var broadcast = null
   obs.onSchedule = Event(function(b){
