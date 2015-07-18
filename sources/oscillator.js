@@ -16,22 +16,20 @@ function OscillatorNode(context){
 
   var targets = []
 
-  var oscillator = context.audio.createOscillator()
+  var oscillator = null
   var power = context.audio.createGain()
   var amp = context.audio.createGain()
   var choker = context.audio.createGain()
   var output = context.audio.createGain()
 
-  oscillator.connect(power)
   choker.gain.value = 0
   amp.gain.value = 0
 
   power.connect(amp)
   amp.connect(choker)
 
-  oscillator.start()
-
   var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
+  var releaseSync = []
 
   var obs = ObservStruct({
     amp: Param(context, 1),
@@ -49,9 +47,6 @@ function OscillatorNode(context){
 
   obs.context = context
 
-  Apply(context, amp.gain, obs.amp)
-  Apply(context, oscillator.detune, obs.detune)
-
   var frequency = Transform(context, [ 440,
     { param: obs.octave, transform: transformOctave },
     { param: obs.noteOffset, transform: transformNote },
@@ -62,20 +57,10 @@ function OscillatorNode(context){
     { param: frequency, transform: frequencyToPowerRolloff }
   ])
 
-  Apply(context, oscillator.frequency, frequency)
+  Apply(context, amp.gain, obs.amp)
   Apply(context, power.gain, powerRolloff)
 
-  var lastShape = 'sine'
-  obs.shape(function(shape){
-    if (shape !== lastShape) {
-      if (context.periodicWaves && context.periodicWaves[shape]) {
-        oscillator.setPeriodicWave(context.periodicWaves[shape])
-      } else {
-        oscillator.type = shape
-      }
-      lastShape = shape
-    }
-  })
+  obs.shape(refreshShape)
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
 
@@ -118,7 +103,6 @@ function OscillatorNode(context){
     
     // release context.noteOffset
     frequency.destroy()
-
     releaseSchedule&&releaseSchedule()
     releaseSchedule = null
   }
@@ -126,6 +110,7 @@ function OscillatorNode(context){
   obs.connect = output.connect.bind(output)
   obs.disconnect = output.disconnect.bind(output)
 
+  resync()
   return obs
 
   //
@@ -134,16 +119,41 @@ function OscillatorNode(context){
     if (maxTime && context.audio.currentTime > maxTime){
       maxTime = null
       choker.disconnect()
+      resync()
     }
   }
 
-  function flush(at){
-    if (hasTriggered){
-      var to = at + 0.2
-      choker.connect(output)
-      if ((!maxTime || maxTime < to) && lastOn < lastOff){
-        maxTime = to
+  function resync () {
+    while (releaseSync.length) {
+      releaseSync.pop()()
+    }
+
+    if (oscillator) {
+      oscillator.disconnect()
+    }
+
+    oscillator = context.audio.createOscillator()
+    oscillator.lastShape = 'sine'
+    
+    refreshShape()
+    oscillator.connect(power)
+    oscillator.start()
+
+    releaseSync.push(
+      Apply(context, oscillator.detune, obs.detune),
+      Apply(context, oscillator.frequency, frequency)
+    )
+  }
+
+  function refreshShape () {
+    var shape = obs.shape()
+    if (shape !== oscillator.lastShape) {
+      if (context.periodicWaves && context.periodicWaves[shape]) {
+        oscillator.setPeriodicWave(context.periodicWaves[shape])
+      } else {
+        oscillator.type = shape
       }
+      oscillator.lastShape = shape
     }
   }
 }
