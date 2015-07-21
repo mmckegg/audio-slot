@@ -12,6 +12,8 @@ var Apply = require('../modulators/apply.js')
 
 var ResolvedValue = require('../resolved-value')
 
+var TempoFromDuration = require('../lib/tempo-from-duration')
+
 module.exports = GranularNode
 
 function GranularNode(context){
@@ -48,6 +50,7 @@ function GranularNode(context){
   ])
 
   obs.resolvedBuffer = ResolvedValue(obs.buffer)
+  obs.tempo = TempoFromDuration(obs.duration, obs.offset, obs.resolvedBuffer, obs.sync)
 
   var active = []
   var scheduledTo = 0
