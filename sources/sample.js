@@ -88,6 +88,7 @@ function SampleNode(context){
       player.buffer = buffer
       player.loopStart = buffer.duration * obs.offset()[0]
       player.loopEnd = buffer.duration * obs.offset()[1]
+      player.onended = disconnectSelf
 
       if (mode === 'loop'){
         player.loop = true
@@ -149,6 +150,10 @@ function SampleNode(context){
       releaseRate()
     }
   }
+}
+
+function disconnectSelf(){
+  this.disconnect()
 }
 
 function noteOffsetToRate(baseRate, value){
