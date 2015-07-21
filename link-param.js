@@ -21,7 +21,7 @@ function LinkParam(context){
   obs._type = 'LinkParam'
   obs.context = context
 
-  var lastParamName = null
+  var updating = false
   var releaseParams = null
 
   //transform: value * (maxValue - minValue) + minValue
@@ -58,22 +58,25 @@ function LinkParam(context){
 
   // scoped
 
-  function handleUpdate(){
-    if (lastParamName !== obs.param()) {
-      lastParamName = obs.param()
-      setImmediate(function() {
-        var param = context.paramLookup.get(obs.param())
-        obs.value.setTarget(param)  
-      })
-    }
+  function updateNow () {
+    var param = context.paramLookup.get(obs.param())
+    obs.value.setTarget(param)  
+    updating = false
   }
 
-  function applyInterpolation(mode, value) {
-    if (mode === 'exp') {
-      return value * value
-    } else {
-      return value
+  function handleUpdate(){
+    if (!updating) {
+      updating = true
+      setImmediate(updateNow)
     }
+  }
+}
+
+function applyInterpolation(mode, value) {
+  if (mode === 'exp') {
+    return value * value
+  } else { // linear
+    return value
   }
 }
 
