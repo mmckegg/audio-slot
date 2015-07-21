@@ -11,7 +11,6 @@ module.exports = AudioSlot
 function AudioSlot(parentContext){
 
   var context = Object.create(parentContext)
-  var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
   var audioContext = context.audio
 
   var input = audioContext.createGain()
@@ -81,9 +80,6 @@ function AudioSlot(parentContext){
 
 
   obs.triggerOn = function(at){
-    //HACK for testing
-    post.connect(output)
-    lastOff = null
 
     var offTime = null
 
@@ -108,44 +104,44 @@ function AudioSlot(parentContext){
   }
 
   obs.triggerOff = function(at){
-    var maxDuration = 0
+    var maxProcessorDuration = 0
+    var maxSourceDuration = 0
+
     var offEvents = []
 
     var offAt = at
 
     obs.sources.forEach(function(source){
       var releaseDuration = source.getReleaseDuration && source.getReleaseDuration() || 0
-      if (releaseDuration > maxDuration){
-        maxDuration = releaseDuration
+      if (releaseDuration > maxSourceDuration){
+        maxSourceDuration = releaseDuration
       }
 
-      source.triggerOff(at)
+      offEvents.push([source, releaseDuration])
     })
 
     obs.processors.forEach(function(processor){
       var releaseDuration = processor.getReleaseDuration && processor.getReleaseDuration() || 0
-      offEvents.push([processor, releaseDuration])
-      if (releaseDuration > maxDuration){
-        maxDuration = releaseDuration
+      offEvents.push([processor, releaseDuration, true])
+      if (releaseDuration > maxProcessorDuration){
+        maxProcessorDuration = releaseDuration
       }
     })
+
+    var difference = maxProcessorDuration - maxSourceDuration
+    var maxDuration = Math.max(maxSourceDuration, maxProcessorDuration)
 
     offEvents.forEach(function(event){
       var target = event[0]
       var releaseDuration = event[1]
 
-      if (target.triggerOff){
-        var time = target.triggerOff(at + maxDuration - releaseDuration)
-        if (time && time > offAt){
-          offAt = time
-        }
+      if (event[2]) {
+        target.triggerOff(at + maxDuration - releaseDuration)
+      } else {
+        target.triggerOff(at + Math.max(0, difference))
       }
-    })
 
-    var time = offAt + 5
-    if (!lastOff || time > lastOff){
-      lastOff = time
-    }
+    })
   }
 
   obs.choke = function(at){
@@ -166,7 +162,6 @@ function AudioSlot(parentContext){
 
   obs.destroy = function(){
     removeSlotWatcher()
-    releaseSchedule()
     removeSlotWatcher = null
   }
 
@@ -225,12 +220,6 @@ function AudioSlot(parentContext){
 
     updatingProcessors = false
 
-  }
-
-  function handleSchedule(){
-    if (lastOff && lastOff < audioContext.currentTime){
-      post.disconnect()
-    }
   }
 
   function checkProcessorsChanged(){
