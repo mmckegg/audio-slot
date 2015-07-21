@@ -14,7 +14,8 @@ function LinkParam(context){
     param: Observ(),
     minValue: Param(context, 0),
     maxValue: Param(context, 1),
-    mode: Prop('linear')
+    mode: Prop('linear'),
+    quantize: Prop(0)
   })
 
   obs.value = ParamProxy(context, 0)
@@ -32,7 +33,8 @@ function LinkParam(context){
       { param: obs.maxValue },
       { param: obs.minValue, transform: subtract }
     ]), transform: multiply },
-    { param: obs.minValue, transform: add }
+    { param: obs.minValue, transform: add },
+    { param: obs.quantize, transform: quantize }
   ])
 
   obs.onSchedule = outputValue.onSchedule
@@ -69,6 +71,14 @@ function LinkParam(context){
       updating = true
       setImmediate(updateNow)
     }
+  }
+}
+
+function quantize (value, grid) {
+  if (grid) {
+    return Math.round(value * grid) / grid
+  } else {
+    return value
   }
 }
 
