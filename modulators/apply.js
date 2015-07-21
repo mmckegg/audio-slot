@@ -113,6 +113,7 @@ function ApplyParam(context, target, param){
 
   function isRampingAt(time){
     for (var i=0;i<events.length;i++){
+      var event = events[i]
       if (event.at >= time && (event.at + event.duration||0) <= time){
         return event.duration && event.mode !== 'log'
       }
