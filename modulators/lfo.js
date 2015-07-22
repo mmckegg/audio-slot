@@ -11,6 +11,7 @@ function LFOModulator(context){
 
   var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
   var active = []
+  var scheduledTo = 0
 
   var free = {
     start: context.audio.currentTime,
@@ -78,7 +79,7 @@ function LFOModulator(context){
 
       broadcast({
         at: at,
-        value: obs.value.getValueAt(at)
+        value: 0
       })
 
       if (at < scheduledTo){
@@ -98,7 +99,7 @@ function LFOModulator(context){
 
       broadcast({
         at: stopAt,
-        value: obs.value.getValueAt(stopAt)
+        value: 0
       })
 
       event.end = stopAt
@@ -204,9 +205,9 @@ function LFOModulator(context){
     if (mode == 'add'){
       return base + value
     } else if (mode === 'subtract'){
-      return base - value
+      return value - base
     } else {
-      return value + (base * value)
+      return base * value
     }
   }
 
