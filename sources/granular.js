@@ -11,6 +11,7 @@ var Transform = require('../modulators/transform.js')
 var Apply = require('../modulators/apply.js')
 
 var ResolvedValue = require('../resolved-value')
+var SyncProperty = require('../lib/granular-sync')
 
 module.exports = GranularNode
 
@@ -19,13 +20,20 @@ function GranularNode(context){
   var output = context.audio.createGain()
   var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
 
+  var offset = Property([0,1])
+  var buffer = Node(context)
+  var resolvedBuffer = ResolvedValue(buffer)
+  var duration = Property(1)
+  var sync = SyncProperty(duration, offset, resolvedBuffer)
+
   var obs = ObservStruct({
     mode: Property('loop'),
-    sync: Property(false),
-    offset: Property([0,1]),
-    buffer: Node(context),
 
-    duration: Property(1),
+    sync: sync,
+    offset: offset,
+    buffer: buffer,
+    duration: duration,
+
     rate: Property(8),
 
     attack: Property(0.1),
@@ -47,7 +55,7 @@ function GranularNode(context){
     { param: obs.tune, transform: centsToRate }
   ])
 
-  obs.resolvedBuffer = ResolvedValue(obs.buffer)
+  obs.resolvedBuffer = resolvedBuffer
 
   var active = []
   var scheduledTo = 0
