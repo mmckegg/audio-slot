@@ -133,7 +133,7 @@ function LFOModulator(context){
       scheduleEvent(event, from, to, schedule.beatDuration)
     }
 
-    if (!obs.trigger()){
+    if (!obs.trigger() && context.active && context.active()){
       scheduleEvent(free, from, to, schedule.beatDuration)
     }
 
