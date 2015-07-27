@@ -29,10 +29,10 @@ function ParamProxy(context, defaultValue){
         if (value.onSchedule) {
           release = value.onSchedule(broadcast)
 
-          if (value.getValue) {
+          if (value.getValueAt) {
             broadcast({
               at: context.audio.currentTime, 
-              value: value.getValue() 
+              value: value.getValueAt(context.audio.currentTime) 
             })
           }
 
