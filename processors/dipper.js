@@ -1,10 +1,10 @@
 var Processor = require('../processor.js')
 
 var Property = require('../property.js')
-var Param = require('../param.js')
+var Param = require('audio-slot-param')
 var watch = require('observ/watch')
 
-var Apply = require('../modulators/apply')
+var Apply = require('audio-slot-param/apply')
 
 module.exports = DipperNode
 

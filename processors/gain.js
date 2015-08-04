@@ -1,6 +1,6 @@
 var Processor = require('../processor.js')
-var Param = require('../param.js')
-var Apply = require('../modulators/apply')
+var Param = require('audio-slot-param')
+var Apply = require('audio-slot-param/apply')
 
 module.exports = GainNode
 

@@ -1,10 +1,10 @@
-var Processor = require('../processor.js')
-var Param = require('../param.js')
-var Property = require('../property.js')
-var Transform = require('../modulators/transform')
-var Apply = require('../modulators/apply')
-
 var watch = require('observ/watch')
+var Processor = require('../processor.js')
+var Property = require('../property.js')
+
+var Param = require('audio-slot-param')
+var Transform = require('audio-slot-param/transform')
+var Apply = require('audio-slot-param/apply')
 
 module.exports = PitchshiftNode
 

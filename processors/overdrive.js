@@ -1,10 +1,9 @@
 var Processor = require('../processor.js')
-
-var Param = require('../param.js')
 var Property = require('../property.js')
 
-var Transform = require('../modulators/transform')
-var Apply = require('../modulators/apply')
+var Param = require('audio-slot-param')
+var Transform = require('audio-slot-param/transform')
+var Apply = require('audio-slot-param/apply')
 
 module.exports = OverdriveNode
 

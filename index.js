@@ -3,7 +3,7 @@ var ObservStruct = require('observ-struct')
 var NodeArray = require('observ-node-array')
 var nextTick = require('next-tick')
 
-var Param = require('./param.js')
+var Param = require('audio-slot-param')
 var Property = require('./property.js')
 
 module.exports = AudioSlot

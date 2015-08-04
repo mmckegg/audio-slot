@@ -1,5 +1,5 @@
 var ObservStruct = require('observ-struct')
-var Param = require('./param.js')
+var Param = require('audio-slot-param')
 
 module.exports = ProcessorNode
 

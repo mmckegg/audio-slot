@@ -1,9 +1,10 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
-var Param = require('../param.js')
 var Property = require('../property.js')
-var Transform = require('./transform.js')
 var Event = require('geval')
+
+var Param = require('audio-slot-param')
+var Transform = require('audio-slot-param/transform')
 
 module.exports = LFOModulator
 

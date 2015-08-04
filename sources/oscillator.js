@@ -4,10 +4,10 @@ var watch = require('observ/watch')
 
 var ObservStruct = require('observ-struct')
 
-var Transform = require('../modulators/transform.js')
-var Apply = require('../modulators/apply.js')
+var Param = require('audio-slot-param')
+var Transform = require('audio-slot-param/transform')
+var Apply = require('audio-slot-param/apply')
 
-var Param = require('../param.js')
 var Property = require('../property.js')
 
 module.exports = OscillatorNode

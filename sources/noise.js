@@ -1,8 +1,9 @@
 var computed = require('observ/computed')
 var ObservStruct = require('observ-struct')
-var Param = require('../param.js')
 var Property = require('../property.js')
-var Apply = require('../modulators/apply.js')
+
+var Param = require('audio-slot-param')
+var Apply = require('audio-slot-param/apply')
 
 module.exports = NoiseNode
 

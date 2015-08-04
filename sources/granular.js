@@ -4,11 +4,11 @@ var watch = require('observ/watch')
 
 var ObservStruct = require('observ-struct')
 var Node = require('observ-node-array/single')
-var Param = require('../param.js')
 var Property = require('../property.js')
 
-var Transform = require('../modulators/transform.js')
-var Apply = require('../modulators/apply.js')
+var Param = require('audio-slot-param')
+var Transform = require('audio-slot-param/transform')
+var Apply = require('audio-slot-param/apply')
 
 var ResolvedValue = require('../resolved-value')
 var SyncProperty = require('../lib/granular-sync')

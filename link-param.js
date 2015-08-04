@@ -1,10 +1,10 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
-var Param = require('./param.js')
 var Prop = require('./property.js')
-var ParamProxy = require('./param-proxy.js')
 
-var Transform = require('./modulators/transform.js')
+var Param = require('audio-slot-param')
+var ParamProxy = require('audio-slot-param/proxy')
+var Transform = require('audio-slot-param/transform')
 
 module.exports = LinkParam
 
