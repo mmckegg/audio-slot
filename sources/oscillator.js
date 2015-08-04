@@ -7,6 +7,7 @@ var ObservStruct = require('observ-struct')
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
 var Apply = require('audio-slot-param/apply')
+var applyScheduler = require('../lib/apply-scheduler')
 
 var Property = require('../property.js')
 
@@ -28,7 +29,7 @@ function OscillatorNode(context){
   power.connect(amp)
   amp.connect(choker)
 
-  var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
+  var releaseSchedule = applyScheduler(context, handleSchedule)
   var releaseSync = []
 
   var obs = ObservStruct({
@@ -38,7 +39,6 @@ function OscillatorNode(context){
     detune: Param(context, 0),
     shape: Property('sine') //Param(context, multiplier.gain, 1)
   })
-
 
   var maxTime = null
   var lastOn = -1

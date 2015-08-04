@@ -4,7 +4,7 @@
   "description": "Web Audio API FRP wrapper for creating, routing, and triggering AudioNodes.",
   "main": "index.js",
   "scripts": {
-    "example": "beefy example.js"
+    "example": "beefy examples/monosynth.js"
   },
   "repository": {
     "type": "git",
@@ -38,5 +38,8 @@
   "bugs": {
     "url": "https://github.com/mmckegg/audio-slot/issues"
   },
-  "homepage": "https://github.com/mmckegg/audio-slot"
+  "homepage": "https://github.com/mmckegg/audio-slot",
+  "devDependencies": {
+    "beefy": "^2.1.5"
+  }
 }

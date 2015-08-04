@@ -53,7 +53,7 @@ function AudioSlot(parentContext){
   // main output
   obs.output(queueRefreshConnections)
 
-  var removeSlotWatcher = context.slotLookup(refreshConnections)
+  var removeSlotWatcher = context.slotLookup && context.slotLookup(refreshConnections)
 
   // reconnect sources on add / update
   var connectedSources = []
@@ -161,7 +161,7 @@ function AudioSlot(parentContext){
   }
 
   obs.destroy = function(){
-    removeSlotWatcher()
+    removeSlotWatcher&&removeSlotWatcher()
     removeSlotWatcher = null
   }
 

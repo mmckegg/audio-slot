@@ -1,24 +1,12 @@
-audio-slot
-===
-
-Web Audio API FRP wrapper for creating, routing, and triggering AudioNodes.
-
-[![NPM](https://nodei.co/npm/audio-slot.png)](https://nodei.co/npm/audio-slot/)
-
-## Example
-
-Create a simple monosynth:
-
-```js
-var Slot = require('audio-slot')
+var Slot = require('../')
 
 var context = {
   audio: new AudioContext(),
   nodes: {
-    oscillator: require('audio-slot/sources/oscillator'),
-    filter: require('audio-slot/processors/filter'),
-    envelope: require('audio-slot/params/envelope'),
-    lfo: require('audio-slot/params/lfo')
+    oscillator: require('../sources/oscillator'),
+    filter: require('../processors/filter'),
+    envelope: require('../params/envelope'),
+    lfo: require('../params/lfo'),
   }
 }
 
@@ -70,5 +58,3 @@ setTimeout(function() {
   synth.triggerOn(5)
   synth.triggerOff(7)
 }, 0.2)
-
-```

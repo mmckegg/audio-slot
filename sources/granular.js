@@ -12,13 +12,14 @@ var Apply = require('audio-slot-param/apply')
 
 var ResolvedValue = require('../resolved-value')
 var SyncProperty = require('../lib/granular-sync')
+var applyScheduler = require('../lib/apply-scheduler')
 
 module.exports = GranularNode
 
 function GranularNode(context){
 
   var output = context.audio.createGain()
-  var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
+  var releaseSchedule = applyScheduler(context, handleSchedule)
 
   var offset = Property([0,1])
   var buffer = Node(context)

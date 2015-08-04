@@ -5,12 +5,13 @@ var Event = require('geval')
 
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
+var applyScheduler = require('../lib/apply-scheduler')
 
-module.exports = LFOModulator
+module.exports = LFO
 
-function LFOModulator(context){
+function LFO(context){
 
-  var releaseSchedule = context.scheduler.onSchedule(handleSchedule)
+  var releaseSchedule = applyScheduler(context, handleSchedule)
   var active = []
   var scheduledTo = 0
 
