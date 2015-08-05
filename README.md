@@ -3,7 +3,15 @@ audio-slot
 
 Web Audio API FRP wrapper for creating, routing, and triggering AudioNodes.
 
+This module serves as the audio engine for [Loop Drop](https://github.com/mmckegg/loop-drop-app).
+
 [![NPM](https://nodei.co/npm/audio-slot.png)](https://nodei.co/npm/audio-slot/)
+
+## Related modules / deps
+
+- [audio-slot-param](https://github.com/mmckegg/audio-slot-param)
+- [observ-node-array](https://github.com/mmckegg/observ-node-array)
+- [observ-struct](https://github.com/raynos/observ-struct)
 
 ## Example
 
@@ -72,3 +80,32 @@ setTimeout(function() {
 }, 0.2)
 
 ```
+
+## Included nodes
+
+### Sources
+
+- oscillator
+- sample
+- granular
+- noise
+
+### Processors
+
+- bitcrusher
+- delay
+- dipper
+- filter
+- freeverb
+- gain
+- overdrive
+- pitchshift
+- reverb
+
+### Params
+
+- chromatic-scale
+- envelope
+- lfo
+- link-modulator
+- trigger-value
