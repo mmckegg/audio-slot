@@ -3,14 +3,14 @@ var watch = require('observ/watch')
 
 module.exports = ResolvedValue
 
-function ResolvedValue(node){
+function ResolvedValue (node) {
   var obs = Observ()
   var release = null
 
-  node.onNode(function(node){
-    release&&release()
+  node.onNode(function (node) {
+    release && release()
     release = null
-    if (node && typeof node.resolved === 'function'){
+    if (node && typeof node.resolved === 'function') {
       release = watch(node.resolved, obs.set)
     } else {
       obs.set(null)

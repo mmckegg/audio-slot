@@ -8,7 +8,7 @@ var Apply = require('audio-slot-param/apply')
 
 module.exports = DipperNode
 
-function DipperNode(context){
+function DipperNode (context) {
   var dipper = initializeMasterDipper(context.audio)
   var input = context.audio.createGain()
   var from = context.audio.createGain()
@@ -24,8 +24,8 @@ function DipperNode(context){
     ratio: Param(context, 1)
   })
 
-  watch(obs.mode, function(value){
-    if (value === 'source'){
+  watch(obs.mode, function (value) {
+    if (value === 'source') {
       from.disconnect()
       to.connect(dipper)
     } else {
@@ -34,7 +34,7 @@ function DipperNode(context){
     }
   })
 
-  obs.destroy = function(){
+  obs.destroy = function () {
     to.disconnect()
     from.disconnect()
   }
@@ -45,37 +45,35 @@ function DipperNode(context){
   return obs
 }
 
-function initializeMasterDipper(audioContext){
-  if (!audioContext.globalDipperProcessor){
-    audioContext.globalDipperProcessor = audioContext.createScriptProcessor(1024*2, 2, 1)
+function initializeMasterDipper (audioContext) {
+  if (!audioContext.globalDipperProcessor) {
+    audioContext.globalDipperProcessor = audioContext.createScriptProcessor(1024 * 2, 2, 1)
     var lastValue = 0
     var targetValue = 0
 
-    audioContext.globalDipperProcessor.onaudioprocess = function(e){
-
+    audioContext.globalDipperProcessor.onaudioprocess = function (e) {
       var inputLength = e.inputBuffer.length
       var outputLength = e.inputBuffer.length
       var inputL = e.inputBuffer.getChannelData(0)
       var inputR = e.inputBuffer.getChannelData(1)
       var output = e.outputBuffer.getChannelData(0)
 
-      var rms = 0;
       targetValue = 0
 
-      for (var i=0;i<inputLength;i++){
+      for (var i = 0;i < inputLength;i++) {
         targetValue += (Math.abs(inputL[i]) + Math.abs(inputR[i])) / 2
       }
 
       targetValue = (targetValue / inputLength) * 2
 
-      for (var i=0;i<outputLength;i++){
+      for (var j = 0;j < outputLength;j++) {
         var difference = lastValue - targetValue
-        if (difference > 0){
+        if (difference > 0) {
           lastValue = lastValue - difference * 0.001 // release
         } else {
           lastValue = lastValue - difference * 0.001 // attack
         }
-        output[i] = Math.max(-1, -lastValue)
+        output[j] = Math.max(-1, -lastValue)
       }
 
     }

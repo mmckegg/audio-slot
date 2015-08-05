@@ -2,14 +2,13 @@ var Processor = require('../processor.js')
 var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
-var Transform = require('audio-slot-param/transform')
 var Apply = require('audio-slot-param/apply')
 
 var buildImpulse = require('../lib/build-impulse.js')
 
 module.exports = ReverbNode
 
-function ReverbNode(context){
+function ReverbNode (context) {
   var input = context.audio.createGain()
   var output = context.audio.createGain()
 
@@ -25,7 +24,7 @@ function ReverbNode(context){
 
   convolver.connect(filter)
   filter.connect(wet)
-  
+
   dry.connect(output)
   wet.connect(output)
 
@@ -46,16 +45,16 @@ function ReverbNode(context){
   obs.reverse(refreshImpulse)
 
   Apply(context, filter.frequency, obs.cutoff)
-  obs.filterType(function(value){
+  obs.filterType(function (value) {
     filter.type = value
   })
 
   Apply(context, wet.gain, obs.wet)
   Apply(context, dry.gain, obs.dry)
 
-  obs.destroy = function(){
+  obs.destroy = function () {
     // release context.tempo
-    if (building){
+    if (building) {
       buildImpulse.cancel(building)
     }
   }
@@ -63,15 +62,15 @@ function ReverbNode(context){
   return obs
 
   // scoped
-  function refreshImpulse() {
+  function refreshImpulse () {
     var rate = context.audio.sampleRate
     var length = Math.max(rate * obs.time(), 1)
 
-    if (building){
+    if (building) {
       buildImpulse.cancel(building)
     }
 
-    building = buildImpulse(length, obs.decay(), obs.reverse(), function(channels){
+    building = buildImpulse(length, obs.decay(), obs.reverse(), function (channels) {
       var impulse = context.audio.createBuffer(2, length, rate)
       impulse.getChannelData(0).set(channels[0])
       impulse.getChannelData(1).set(channels[1])

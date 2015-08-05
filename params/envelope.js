@@ -1,4 +1,3 @@
-var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var Property = require('observ-default')
 var Event = require('geval')
@@ -8,8 +7,7 @@ var Transform = require('audio-slot-param/transform')
 
 module.exports = Envelope
 
-function Envelope(context){
-
+function Envelope (context) {
   var obs = ObservStruct({
     attack: Property(0),
     decay: Property(0),
@@ -20,10 +18,10 @@ function Envelope(context){
 
   var broadcast = null
   var eventSource = {
-    onSchedule: Event(function(b){
+    onSchedule: Event(function (b) {
       broadcast = b
     }),
-    getValueAt: function(at){
+    getValueAt: function (at) {
       return 0
     }
   }
@@ -38,41 +36,41 @@ function Envelope(context){
 
   obs.context = context
 
-  obs.triggerOn = function(at){
+  obs.triggerOn = function (at) {
     at = Math.max(at, context.audio.currentTime)
 
     var peakTime = at + (obs.attack() || 0.005)
 
-    if (obs.attack()){
-      broadcast({ 
+    if (obs.attack()) {
+      broadcast({
         fromValue: 0,
-        value: 1, 
-        at: at, 
-        duration: obs.attack(), 
-        mode: 'log' 
+        value: 1,
+        at: at,
+        duration: obs.attack(),
+        mode: 'log'
       })
     } else {
       broadcast({ value: 1, at: at })
     }
 
     // decay / sustain
-    broadcast({ 
-      value: obs.sustain(), 
-      at: peakTime, 
-      duration: obs.decay(), 
-      mode: 'log' 
+    broadcast({
+      value: obs.sustain(),
+      at: peakTime,
+      duration: obs.decay(),
+      mode: 'log'
     })
   }
 
-  obs.triggerOff = function(at){
+  obs.triggerOff = function (at) {
     at = Math.max(at, context.audio.currentTime)
 
     // release
-    if (obs.release()){
-      broadcast({ 
-        value: 0, at: at, 
-        duration: obs.release(), 
-        mode: 'log' 
+    if (obs.release()) {
+      broadcast({
+        value: 0, at: at,
+        duration: obs.release(),
+        mode: 'log'
       })
     } else {
       broadcast({ value: 0, at: at })
@@ -81,21 +79,13 @@ function Envelope(context){
     return at + obs.release()
   }
 
-  obs.getReleaseDuration = function(){
+  obs.getReleaseDuration = function () {
     return obs.release()
   }
 
   return obs
 }
 
-function getValue(start, end, fromTime, toTime, at){
-  var difference = end - start
-  var time = toTime - fromTime
-  var truncateTime = at - fromTime
-  var phase = truncateTime / time
-  return start + phase * difference
-}
-
-function multiply (a,b) {
+function multiply (a, b) {
   return a * b
 }

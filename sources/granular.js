@@ -1,7 +1,3 @@
-var Observ = require('observ')
-var computed = require('observ/computed')
-var watch = require('observ/watch')
-
 var ObservStruct = require('observ-struct')
 var Node = require('observ-node-array/single')
 var Property = require('observ-default')
@@ -16,12 +12,11 @@ var applyScheduler = require('../lib/apply-scheduler')
 
 module.exports = GranularNode
 
-function GranularNode(context){
-
+function GranularNode (context) {
   var output = context.audio.createGain()
   var releaseSchedule = applyScheduler(context, handleSchedule)
 
-  var offset = Property([0,1])
+  var offset = Property([0, 1])
   var buffer = Node(context)
   var resolvedBuffer = ResolvedValue(buffer)
   var duration = Property(1)
@@ -62,17 +57,17 @@ function GranularNode(context){
   var scheduledTo = 0
   var lastBeatDuration = 1
 
-  obs.choke = function(at){
+  obs.choke = function (at) {
     at = at || context.audio.currentTime
-    var event = eventAt(at-0.02)
-    if (event){
-      var stopAt = at+(0.02*6)
+    var event = eventAt(at - 0.02)
+    if (event) {
+      var stopAt = at + (0.02 * 6)
       event.output.gain.setTargetAtTime(0, at, 0.02)
       event.end = stopAt
     }
   }
 
-  obs.triggerOn = function(at){
+  obs.triggerOn = function (at) {
     obs.choke(at)
 
     var amp = context.audio.createGain()
@@ -87,7 +82,7 @@ function GranularNode(context){
       output: amp
     }
 
-    if (obs.mode() === 'oneshot'){
+    if (obs.mode() === 'oneshot') {
       event.oneshot = true
       var duration = obs.sync() ? obs.duration() * lastBeatDuration : obs.duration()
       stopAt = at + duration
@@ -103,17 +98,17 @@ function GranularNode(context){
 
     active.push(event)
 
-    if (at < scheduledTo){
+    if (at < scheduledTo) {
       scheduleEvent(event, at, scheduledTo, lastBeatDuration)
     }
 
     return stopAt
   }
 
-  obs.triggerOff = function(at){
+  obs.triggerOff = function (at) {
     at = at || context.audio.currentTime
     var event = eventAt(at)
-    if (event && !event.oneshot){
+    if (event && !event.oneshot) {
       var stopAt = obs.getReleaseDuration() + at
       Param.triggerOff(obs, stopAt)
       truncate(stopAt)
@@ -121,13 +116,12 @@ function GranularNode(context){
     }
   }
 
-  obs.destroy = function(){
-    
+  obs.destroy = function () {
     // release context.noteOffset
-    playbackRate.destroy() 
+    playbackRate.destroy()
 
-    releaseSchedule&&releaseSchedule()
-    releaseSchedule  = null
+    releaseSchedule && releaseSchedule()
+    releaseSchedule = null
   }
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
@@ -136,18 +130,17 @@ function GranularNode(context){
 
   return obs
 
-  // 
+  // scoped
 
-  function handleSchedule(schedule){
+  function handleSchedule (schedule) {
     var from = schedule.time
     var to = schedule.time + schedule.duration
 
-    for (var i=active.length-1;i>=0;i--){
-
+    for (var i = active.length - 1;i >= 0;i--) {
       var event = active[i]
 
       // clean up old events
-      if (event.end && event.end < context.audio.currentTime){
+      if (event.end && event.end < context.audio.currentTime) {
         event.output.disconnect()
         active.splice(i, 1)
         continue
@@ -160,12 +153,12 @@ function GranularNode(context){
     scheduledTo = to
   }
 
-  function scheduleEvent(event, from, to, beatDuration){
-    if (event.start <= from && (!event.end || event.end > to)){
+  function scheduleEvent (event, from, to, beatDuration) {
+    if (event.start <= from && (!event.end || event.end > to)) {
       var length = obs.duration()
       var rate = obs.rate()
 
-      if (obs.sync()){
+      if (obs.sync()) {
         length = length * beatDuration
         rate = rate / beatDuration
       }
@@ -173,24 +166,23 @@ function GranularNode(context){
       var slices = Math.max(1, rate) * length
       var duration = length / slices
 
-      while (event.nextTime < to){
+      while (event.nextTime < to) {
         play(event.output, event.nextTime, event.nextOffset, duration)
 
         event.nextTime += duration
         event.nextOffset += 1 / slices
-        if (obs.mode() !== 'oneshot'){
+        if (obs.mode() !== 'oneshot') {
           event.nextOffset = event.nextOffset % 1
         }
       }
     }
   }
 
-  function play(output, at, startOffset, grainDuration){
+  function play (output, at, startOffset, grainDuration) {
     var event = eventAt(at)
 
     var buffer = obs.resolvedBuffer()
-    if (buffer instanceof AudioBuffer){
-
+    if (buffer instanceof window.AudioBuffer) {
       var source = context.audio.createBufferSource()
       source.buffer = buffer
 
@@ -208,7 +200,7 @@ function GranularNode(context){
 
       source.playbackRate.value = playbackRate.getValueAt(at)
 
-      if (obs.mode() !== 'oneshot' && releaseAt + release > startOffset * duration){
+      if (obs.mode() !== 'oneshot' && releaseAt + release > startOffset * duration) {
         source.loop = true
         source.loopStart = start
         source.loopEnd = end
@@ -216,13 +208,12 @@ function GranularNode(context){
 
       source.start(at, startOffset * duration + start)
       source.stop(releaseAt + release)
-      //source.onended = disconnectSelf
 
       var envelope = context.audio.createGain()
       source.connect(envelope)
 
       // envelope
-      if (attack){
+      if (attack) {
         envelope.gain.setValueAtTime(0, at)
         envelope.gain.linearRampToValueAtTime(1, Math.min(attack, grainDuration) + at)
       }
@@ -233,19 +224,19 @@ function GranularNode(context){
     }
   }
 
-  function truncate(at){
-    for (var i=active.length-1;i>=0;i--){
-      if (active[i].start >= at){
+  function truncate (at) {
+    for (var i = active.length - 1;i >= 0;i--) {
+      if (active[i].start >= at) {
         active.splice(i, 1)
-      } else if (active[i].end && active[i].end > at){
+      } else if (active[i].end && active[i].end > at) {
         active[i].end = at
       }
     }
   }
 
-  function eventAt(time){
-    for (var i=0;i<active.length;i++){
-      if (active[i].start <= time && (!active[i].end || active[i].end > time)){
+  function eventAt (time) {
+    for (var i = 0;i < active.length;i++) {
+      if (active[i].start <= time && (!active[i].end || active[i].end > time)) {
         return active[i]
       }
     }
@@ -253,14 +244,10 @@ function GranularNode(context){
 
 }
 
-function disconnectSelf(){
-  this.disconnect()
-}
-
-function noteOffsetToRate(baseRate, value){
+function noteOffsetToRate (baseRate, value) {
   return baseRate * Math.pow(2, value / 12)
 }
 
-function centsToRate(baseRate, value){
+function centsToRate (baseRate, value) {
   return baseRate * Math.pow(2, value / 1200)
 }

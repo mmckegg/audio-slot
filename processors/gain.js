@@ -4,7 +4,7 @@ var Apply = require('audio-slot-param/apply')
 
 module.exports = GainNode
 
-function GainNode(context){
+function GainNode (context) {
   var node = context.audio.createGain()
 
   var obs = Processor(context, node, node, {

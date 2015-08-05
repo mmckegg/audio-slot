@@ -1,7 +1,3 @@
-var Observ = require('observ')
-var computed = require('observ/computed')
-var watch = require('observ/watch')
-
 var ObservStruct = require('observ-struct')
 
 var Param = require('audio-slot-param')
@@ -13,10 +9,7 @@ var Property = require('observ-default')
 
 module.exports = OscillatorNode
 
-function OscillatorNode(context){
-
-  var targets = []
-
+function OscillatorNode (context) {
   var oscillator = null
   var power = context.audio.createGain()
   var amp = context.audio.createGain()
@@ -37,13 +30,12 @@ function OscillatorNode(context){
     noteOffset: Param(context, 0),
     octave: Param(context, 0),
     detune: Param(context, 0),
-    shape: Property('sine') //Param(context, multiplier.gain, 1)
+    shape: Property('sine') // Param(context, multiplier.gain, 1)
   })
 
   var maxTime = null
   var lastOn = -1
   var lastOff = 0
-  var hasTriggered = false
 
   obs.context = context
 
@@ -64,7 +56,7 @@ function OscillatorNode(context){
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
 
-  obs.triggerOn = function(at){
+  obs.triggerOn = function (at) {
     at = at || context.audio.currentTime
     choker.connect(output)
     choker.gain.cancelScheduledValues(at)
@@ -74,14 +66,13 @@ function OscillatorNode(context){
     Param.triggerOn(obs, at)
 
     maxTime = null
-    hasTriggered = true
 
-    if (lastOn < at){
+    if (lastOn < at) {
       lastOn = at
     }
   }
 
-  obs.triggerOff = function(at){
+  obs.triggerOff = function (at) {
     at = at || context.audio.currentTime
     var stopAt = obs.getReleaseDuration() + at
 
@@ -90,20 +81,19 @@ function OscillatorNode(context){
 
     choker.gain.setValueAtTime(0, stopAt)
 
-    if (stopAt > maxTime){
+    if (stopAt > maxTime) {
       maxTime = stopAt
     }
 
-    if (lastOff < at){
+    if (lastOff < at) {
       lastOff = at
     }
   }
 
-  obs.destroy = function(){
-    
+  obs.destroy = function () {
     // release context.noteOffset
     frequency.destroy()
-    releaseSchedule&&releaseSchedule()
+    releaseSchedule && releaseSchedule()
     releaseSchedule = null
   }
 
@@ -115,8 +105,8 @@ function OscillatorNode(context){
 
   //
 
-  function handleSchedule(schedule){
-    if (maxTime && context.audio.currentTime > maxTime){
+  function handleSchedule (schedule) {
+    if (maxTime && context.audio.currentTime > maxTime) {
       maxTime = null
       choker.disconnect()
       resync()
@@ -134,7 +124,7 @@ function OscillatorNode(context){
 
     oscillator = context.audio.createOscillator()
     oscillator.lastShape = 'sine'
-    
+
     refreshShape()
     oscillator.connect(power)
     oscillator.start()
@@ -158,14 +148,14 @@ function OscillatorNode(context){
   }
 }
 
-function transformOctave(baseFrequency, value){
+function transformOctave (baseFrequency, value) {
   return baseFrequency * Math.pow(2, value)
 }
 
-function transformNote(baseFrequency, value){
+function transformNote (baseFrequency, value) {
   return baseFrequency * Math.pow(2, value / 12)
 }
 
-function frequencyToPowerRolloff(baseValue, value){
+function frequencyToPowerRolloff (baseValue, value) {
   return 1 - ((value / 20000) || 0)
 }

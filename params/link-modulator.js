@@ -8,8 +8,7 @@ var Transform = require('audio-slot-param/transform')
 
 module.exports = ParamModulator
 
-function ParamModulator(context){
-
+function ParamModulator (context) {
   var obs = ObservStruct({
     param: Observ(),
     value: Param(context, 0)
@@ -27,13 +26,13 @@ function ParamModulator(context){
   var handleSchedule = null
 
   var eventSource = {
-    onSchedule: Event(function(broadcast){
+    onSchedule: Event(function (broadcast) {
       handleSchedule = broadcast
     }),
-    getValueAt: function(at){
+    getValueAt: function (at) {
       if (typeof currentParam === 'number') {
         return currentParam
-      } else if (currentParam && currentParam.getValueAt){
+      } else if (currentParam && currentParam.getValueAt) {
         return currentParam.getValueAt(at)
       } else {
         return 0
@@ -49,7 +48,7 @@ function ParamModulator(context){
   obs.onSchedule = transformedValue.onSchedule
   obs.getValueAt = transformedValue.getValueAt
 
-  if (context.paramLookup){
+  if (context.paramLookup) {
     releaseParams = context.paramLookup(handleUpdate)
   }
 
@@ -57,9 +56,9 @@ function ParamModulator(context){
 
   nextTick(transformedValue.resend)
 
-  obs.destroy = function(){
-    releaseParams&&releaseParams()
-    releaseSchedule&&releaseSchedule()
+  obs.destroy = function () {
+    releaseParams && releaseParams()
+    releaseSchedule && releaseSchedule()
     releaseSchedule = releaseParams = null
   }
 
@@ -67,16 +66,16 @@ function ParamModulator(context){
 
   // scale
 
-  function handleUpdate(){
+  function handleUpdate () {
     var param = context.paramLookup.get(obs.param())
-    if (currentParam !== param){
-      releaseSchedule&&releaseSchedule()
+    if (currentParam !== param) {
+      releaseSchedule && releaseSchedule()
       releaseSchedule = null
-      if (param){
+      if (param) {
         if (param.onSchedule) {
           releaseSchedule = param.onSchedule(handleSchedule)
         } else if (typeof param === 'function') {
-          releaseSchedule = param(function(value) {
+          releaseSchedule = param(function (value) {
             handleSchedule({
               value: value,
               at: context.audio.currentTime
@@ -88,7 +87,7 @@ function ParamModulator(context){
     currentParam = param
   }
 
-  function operation(base, value){
+  function operation (base, value) {
     return base + value
   }
 

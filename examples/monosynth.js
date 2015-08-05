@@ -1,21 +1,21 @@
 var Slot = require('../')
 
 var context = {
-  audio: new AudioContext(),
+  audio: new window.AudioContext(),
   nodes: {
     oscillator: require('../sources/oscillator'),
     filter: require('../processors/filter'),
     envelope: require('../params/envelope'),
-    lfo: require('../params/lfo'),
+    lfo: require('../params/lfo')
   }
 }
 
 var synth = Slot(context)
 synth.set({
   sources: [
-    { 
-      node: 'oscillator', 
-      shape: 'sawtooth', 
+    {
+      node: 'oscillator',
+      shape: 'sawtooth',
       amp: {
         node: 'envelope',
         value: 0.6,
@@ -50,7 +50,7 @@ synth.set({
 synth.connect(context.audio.destination)
 
 // trigger!
-setTimeout(function() {
+setTimeout(function () {
   synth.triggerOn(1)
   synth.triggerOff(2)
   synth.triggerOn(3)

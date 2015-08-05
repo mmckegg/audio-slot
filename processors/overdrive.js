@@ -1,5 +1,4 @@
 var Processor = require('../processor.js')
-var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
@@ -9,13 +8,13 @@ module.exports = OverdriveNode
 
 var curve = generateCurve(22050)
 
-function OverdriveNode(context){
+function OverdriveNode (context) {
   var input = context.audio.createGain()
   var output = context.audio.createGain()
 
   var bpWet = context.audio.createGain()
   var bpDry = context.audio.createGain()
-  
+
   var bandpass = context.audio.createBiquadFilter()
   bandpass.type = 'bandpass'
 
@@ -54,15 +53,15 @@ function OverdriveNode(context){
   return obs
 }
 
-function subtract(a, b){
+function subtract (a, b) {
   return a - b
 }
 
-function generateCurve(steps){
+function generateCurve (steps) {
   var curve = new Float32Array(steps)
   var deg = Math.PI / 180
 
-  for (var i=0;i<steps;i++) {
+  for (var i = 0;i < steps;i++) {
     var x = i * 2 / steps - 1
     curve[i] = (3 + 10) * x * 20 * deg / (Math.PI + 10 * Math.abs(x))
   }

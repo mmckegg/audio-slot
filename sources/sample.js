@@ -1,7 +1,3 @@
-var Observ = require('observ')
-var watch = require('observ/watch')
-var computed = require('observ/computed')
-
 var ObservStruct = require('observ-struct')
 var Node = require('observ-node-array/single')
 var Property = require('observ-default')
@@ -14,14 +10,12 @@ var ResolvedValue = require('../resolved-value')
 
 module.exports = SampleNode
 
-function SampleNode(context){
-
+function SampleNode (context) {
   var output = context.audio.createGain()
 
   var obs = ObservStruct({
-
     mode: Property('hold'),
-    offset: Property([0,1]),
+    offset: Property([0, 1]),
     buffer: Node(context),
 
     amp: Param(context, 1),
@@ -51,28 +45,28 @@ function SampleNode(context){
     { param: obs.tune, transform: centsToRate }
   ])
 
-  obs.offset(function(value){
+  obs.offset(function (value) {
     var buffer = obs.resolvedBuffer()
-    if (buffer && player && Array.isArray(value)){
+    if (buffer && player && Array.isArray(value)) {
       player.loopStart = buffer.duration * value[0]
       player.loopEnd = buffer.duration * value[1]
     }
   })
 
-  obs.choke = function(at){
-    stop(at+(0.02*6))
-    if (choker && at < playTo){
+  obs.choke = function (at) {
+    stop(at + (0.02 * 6))
+    if (choker && at < playTo) {
       choker.gain.setTargetAtTime(0, at, 0.02)
     }
   }
 
-  obs.triggerOn = function(at){
+  obs.triggerOn = function (at) {
     obs.choke(at)
 
     var mode = obs.mode()
     var buffer = obs.resolvedBuffer()
- 
-    if (buffer instanceof AudioBuffer){
+
+    if (buffer instanceof window.AudioBuffer) {
       playTo = null
       choker = context.audio.createGain()
       amp = context.audio.createGain()
@@ -90,13 +84,13 @@ function SampleNode(context){
       player.loopEnd = buffer.duration * obs.offset()[1]
       player.onended = disconnectSelf
 
-      if (mode === 'loop'){
+      if (mode === 'loop') {
         player.loop = true
         player.start(at, player.loopStart, 1000)
         Param.triggerOn(obs, at)
-      } else if (mode === 'release'){
+      } else if (mode === 'release') {
         triggerOnRelease = true
-      } else if (mode === 'oneshot'){
+      } else if (mode === 'oneshot') {
         player.start(at, player.loopStart, player.loopEnd - player.loopStart)
         Param.triggerOn(obs, at)
 
@@ -110,14 +104,14 @@ function SampleNode(context){
     }
   }
 
-  obs.triggerOff = function(at){
-    if (isOneshot){
+  obs.triggerOff = function (at) {
+    if (isOneshot) {
       isOneshot = false
     } else {
       at = at || context.audio.currentTime
       var stopAt = obs.getReleaseDuration() + at
 
-      if (triggerOnRelease){
+      if (triggerOnRelease) {
         Param.triggerOn(obs, at)
         player.start(at, player.loopStart, player.loopEnd - player.loopStart)
         stopAt += player.loopEnd - player.loopStart
@@ -129,9 +123,9 @@ function SampleNode(context){
     }
   }
 
-  obs.destroy = function(){
+  obs.destroy = function () {
     // release context.noteOffset
-    playbackRate.destroy() 
+    playbackRate.destroy()
   }
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
@@ -142,8 +136,8 @@ function SampleNode(context){
 
   // scoped
 
-  function stop(at){
-    if (!playTo && player){
+  function stop (at) {
+    if (!playTo && player) {
       playTo = at
       player.stop(at)
       releaseAmp()
@@ -152,14 +146,14 @@ function SampleNode(context){
   }
 }
 
-function disconnectSelf(){
+function disconnectSelf () {
   this.disconnect()
 }
 
-function noteOffsetToRate(baseRate, value){
+function noteOffsetToRate (baseRate, value) {
   return baseRate * Math.pow(2, value / 12)
 }
 
-function centsToRate(baseRate, value){
+function centsToRate (baseRate, value) {
   return baseRate * Math.pow(2, value / 1200)
 }

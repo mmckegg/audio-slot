@@ -9,8 +9,7 @@ var Apply = require('audio-slot-param/apply')
 
 module.exports = FreeverbNode
 
-function FreeverbNode(context){
-
+function FreeverbNode (context) {
   var reverb = Freeverb(context.audio)
 
   var obs = Processor(context, reverb, reverb, {
@@ -20,11 +19,11 @@ function FreeverbNode(context){
     dry: Param(context, 1)
   })
 
-  watch(obs.roomSize, function(value) {
+  watch(obs.roomSize, function (value) {
     reverb.roomSize = Math.min(1, Math.max(0, value))
   })
 
-  watch(obs.dampening, function(value) {
+  watch(obs.dampening, function (value) {
     reverb.dampening = Math.min(20000, Math.max(0, value))
   })
 

@@ -8,7 +8,7 @@ var Apply = require('audio-slot-param/apply')
 
 module.exports = DelayNode
 
-function DelayNode(context){
+function DelayNode (context) {
   var input = context.audio.createGain()
   var output = context.audio.createGain()
 
@@ -55,29 +55,29 @@ function DelayNode(context){
   Apply(context, delay.delayTime, time)
   Apply(context, filter.frequency, obs.cutoff)
   Apply(context, feedback.gain, obs.feedback)
-  obs.filterType(function(value){
+  obs.filterType(function (value) {
     filter.type = value
   })
 
   Apply(context, wet.gain, obs.wet)
   Apply(context, dry.gain, obs.dry)
 
-  obs.destroy = function(){
+  obs.destroy = function () {
     // release context.tempo
-    rateMultiplier.destroy() 
+    rateMultiplier.destroy()
   }
 
   return obs
 }
 
-function getRateMultiplier(sync, tempo){
-  if (sync){
+function getRateMultiplier (sync, tempo) {
+  if (sync) {
     return 60 / tempo
   } else {
     return 1
   }
 }
 
-function multiply(a, b){
+function multiply (a, b) {
   return a * b
 }

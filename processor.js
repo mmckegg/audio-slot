@@ -3,7 +3,7 @@ var Param = require('audio-slot-param')
 
 module.exports = ProcessorNode
 
-function ProcessorNode(context, input, output, params){
+function ProcessorNode (context, input, output, params) {
   var obs = ObservStruct(params)
 
   obs.input = input
@@ -13,12 +13,12 @@ function ProcessorNode(context, input, output, params){
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
   obs.context = context
 
-  obs.triggerOn = function(at){
+  obs.triggerOn = function (at) {
     at = at || context.audio.currentTime
     Param.triggerOn(obs, at)
   }
 
-  obs.triggerOff = function(at){
+  obs.triggerOff = function (at) {
     at = at || context.audio.currentTime
     var stopAt = obs.getReleaseDuration(at) + at
     Param.triggerOff(obs, stopAt)

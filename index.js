@@ -8,8 +8,7 @@ var Property = require('observ-default')
 
 module.exports = AudioSlot
 
-function AudioSlot(parentContext){
-
+function AudioSlot (parentContext) {
   var context = Object.create(parentContext)
   var audioContext = context.audio
 
@@ -42,11 +41,9 @@ function AudioSlot(parentContext){
   context.noteOffset = obs.noteOffset
   context.slot = obs
 
-  obs.volume(function(value){
+  obs.volume(function (value) {
     output.gain.value = value
   })
-
-  var lastOff = null
 
   obs.input = input
 
@@ -57,11 +54,11 @@ function AudioSlot(parentContext){
 
   // reconnect sources on add / update
   var connectedSources = []
-  obs.sources.onUpdate(function(diff){
-    while (connectedSources.length){
+  obs.sources.onUpdate(function (diff) {
+    while (connectedSources.length) {
       connectedSources.pop().disconnect()
     }
-    obs.sources.forEach(function(source){
+    obs.sources.forEach(function (source) {
       source.connect(pre)
       connectedSources.push(source)
     })
@@ -71,59 +68,55 @@ function AudioSlot(parentContext){
   var connectedProcessors = [ toProcessors ]
   var updatingProcessors = false
 
-  obs.processors.onUpdate(function(diff){
-    if (!updatingProcessors){
+  obs.processors.onUpdate(function (diff) {
+    if (!updatingProcessors) {
       nextTick(updateProcessors)
     }
     updatingProcessors = true
   })
 
-
-  obs.triggerOn = function(at){
-
+  obs.triggerOn = function (at) {
     var offTime = null
 
-    obs.sources.forEach(function(source){
+    obs.sources.forEach(function (source) {
       var time = source.triggerOn(at)
-      if (time && (!offTime || time > offTime)){
+      if (time && (!offTime || time > offTime)) {
         offTime = time
       }
     })
 
     // for processor modulators
-    obs.processors.forEach(function(processor){
-      var time = processor&&processor.triggerOn(at)
-      if (time && (!offTime || time > offTime)){
+    obs.processors.forEach(function (processor) {
+      var time = processor && processor.triggerOn(at)
+      if (time && (!offTime || time > offTime)) {
         offTime = time
       }
     })
 
-    if (offTime){
+    if (offTime) {
       obs.triggerOff(offTime)
     }
   }
 
-  obs.triggerOff = function(at){
+  obs.triggerOff = function (at) {
     var maxProcessorDuration = 0
     var maxSourceDuration = 0
 
     var offEvents = []
 
-    var offAt = at
-
-    obs.sources.forEach(function(source){
+    obs.sources.forEach(function (source) {
       var releaseDuration = source.getReleaseDuration && source.getReleaseDuration() || 0
-      if (releaseDuration > maxSourceDuration){
+      if (releaseDuration > maxSourceDuration) {
         maxSourceDuration = releaseDuration
       }
 
       offEvents.push([source, releaseDuration])
     })
 
-    obs.processors.forEach(function(processor){
+    obs.processors.forEach(function (processor) {
       var releaseDuration = processor.getReleaseDuration && processor.getReleaseDuration() || 0
       offEvents.push([processor, releaseDuration, true])
-      if (releaseDuration > maxProcessorDuration){
+      if (releaseDuration > maxProcessorDuration) {
         maxProcessorDuration = releaseDuration
       }
     })
@@ -131,7 +124,7 @@ function AudioSlot(parentContext){
     var difference = maxProcessorDuration - maxSourceDuration
     var maxDuration = Math.max(maxSourceDuration, maxProcessorDuration)
 
-    offEvents.forEach(function(event){
+    offEvents.forEach(function (event) {
       var target = event[0]
       var releaseDuration = event[1]
 
@@ -144,24 +137,24 @@ function AudioSlot(parentContext){
     })
   }
 
-  obs.choke = function(at){
-    obs.sources.forEach(function(source){
-      source.choke&&source.choke(at)
+  obs.choke = function (at) {
+    obs.sources.forEach(function (source) {
+      source.choke && source.choke(at)
     })
   }
 
-  obs.connect = function(to){
+  obs.connect = function (to) {
     extraConnections.push(to)
     refreshConnections()
   }
 
-  obs.disconnect = function(){
+  obs.disconnect = function () {
     extraConnections.length = 0
     refreshConnections()
   }
 
-  obs.destroy = function(){
-    removeSlotWatcher&&removeSlotWatcher()
+  obs.destroy = function () {
+    removeSlotWatcher && removeSlotWatcher()
     removeSlotWatcher = null
   }
 
@@ -169,46 +162,44 @@ function AudioSlot(parentContext){
 
   // scoped
 
-  function queueRefreshConnections(){
-    if (!refreshingConnections){
+  function queueRefreshConnections () {
+    if (!refreshingConnections) {
       refreshingConnections = true
       nextTick(refreshConnections)
     }
   }
 
-  function refreshConnections(){
+  function refreshConnections () {
     refreshingConnections = false
 
     output.disconnect()
 
-    extraConnections.forEach(function(target){
+    extraConnections.forEach(function (target) {
       output.connect(target)
     })
 
     var outputNames = typeof obs.output() === 'string' ? [obs.output()] : obs.output()
 
-    if (Array.isArray(outputNames)){
-      outputNames.forEach(function(name){
+    if (Array.isArray(outputNames)) {
+      outputNames.forEach(function (name) {
         var destinationSlot = context.slotLookup.get(name)
-        if (destinationSlot && destinationSlot.input){
+        if (destinationSlot && destinationSlot.input) {
           output.connect(destinationSlot.input)
         }
       })
     }
   }
 
-  function updateProcessors(){
-
-    if (checkProcessorsChanged()){
-
+  function updateProcessors () {
+    if (checkProcessorsChanged()) {
       toProcessors.disconnect()
-      while (connectedProcessors.length){
+      while (connectedProcessors.length) {
         connectedProcessors.pop().disconnect()
       }
 
       var lastProcessor = toProcessors
-      obs.processors.forEach(function(processor){
-        if (processor){
+      obs.processors.forEach(function (processor) {
+        if (processor) {
           lastProcessor.connect(processor.input)
           lastProcessor = processor
         }
@@ -222,12 +213,12 @@ function AudioSlot(parentContext){
 
   }
 
-  function checkProcessorsChanged(){
-    if (connectedProcessors.length !== obs.processors.getLength()){
+  function checkProcessorsChanged () {
+    if (connectedProcessors.length !== obs.processors.getLength()) {
       return true
     } else {
-      for (var i=0;i<connectedProcessors.length;i++){
-        if (connectedProcessors[i] !== obs.processors.get(i)){
+      for (var i = 0;i < connectedProcessors.length;i++) {
+        if (connectedProcessors[i] !== obs.processors.get(i)) {
           return true
         }
       }

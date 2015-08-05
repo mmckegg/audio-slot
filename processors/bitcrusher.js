@@ -1,12 +1,11 @@
 var Processor = require('../processor.js')
-var Param = require('audio-slot-param')
 var Property = require('observ-default')
 var Bitcrusher = require('bitcrusher')
 var watch = require('observ/watch')
 
 module.exports = BitcrusherNode
 
-function BitcrusherNode(context){
+function BitcrusherNode (context) {
   var node = Bitcrusher(context.audio, { bufferSize: 256 })
 
   var obs = Processor(context, node, node, {
@@ -14,11 +13,11 @@ function BitcrusherNode(context){
     frequency: Property(1)
   })
 
-  watch(obs.bitDepth, function(value){
+  watch(obs.bitDepth, function (value) {
     node.bitDepth = value
   })
- 
-  watch(obs.frequency, function(value){
+
+  watch(obs.frequency, function (value) {
     node.frequency = value
   })
 

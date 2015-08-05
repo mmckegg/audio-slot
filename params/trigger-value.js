@@ -5,8 +5,7 @@ var Event = require('geval')
 
 module.exports = ValueModulator
 
-function ValueModulator(parentContext){
-
+function ValueModulator (parentContext) {
   var context = Object.create(parentContext)
 
   var obs = ObservStruct({
@@ -18,13 +17,13 @@ function ValueModulator(parentContext){
   context.slot = obs
 
   var broadcast = null
-  obs.onSchedule = Event(function(b){
+  obs.onSchedule = Event(function (b) {
     broadcast = b
   })
 
-  obs.value.onSchedule(function(value){
+  obs.value.onSchedule(function (value) {
     // only send modulations while triggering
-    if (lastTriggerOn > lastTriggerOff){
+    if (lastTriggerOn > lastTriggerOff) {
       broadcast(value)
     }
   })
@@ -34,24 +33,24 @@ function ValueModulator(parentContext){
   var lastTriggerOn = -1
   var lastTriggerOff = 0
 
-  obs.triggerOn = function(at){
+  obs.triggerOn = function (at) {
     at = at || context.audio.currentTime
     lastTriggerOn = at
 
     Param.triggerOn(obs, at)
 
-    if (!obs.value.node){
+    if (!obs.value.node) {
       broadcast({ value: obs.value.getValue(), at: at })
     }
   }
 
-  obs.triggerOff = function(at){
+  obs.triggerOff = function (at) {
     at = at || context.audio.currentTime
 
     var stopAt = obs.getReleaseDuration() + at
     Param.triggerOff(obs, stopAt)
 
-    if (!obs.value.node){
+    if (!obs.value.node) {
       broadcast({ value: 0, at: at })
     }
 

@@ -6,9 +6,9 @@ var Apply = require('audio-slot-param/apply')
 
 module.exports = FilterNode
 
-function FilterNode(context){
+function FilterNode (context) {
   var node = context.audio.createBiquadFilter()
-  
+
   var obs = Processor(context, node, node, {
     frequency: Param(context, node.frequency.defaultValue),
     Q: Param(context, node.Q.defaultValue),
@@ -16,7 +16,7 @@ function FilterNode(context){
     type: Property(node.type)
   })
 
-  obs.type(function(value){
+  obs.type(function (value) {
     node.type = value
   })
 
