@@ -9,7 +9,7 @@ var Transform = require('audio-slot-param/transform')
 var Apply = require('audio-slot-param/apply')
 var applyScheduler = require('../lib/apply-scheduler')
 
-var Property = require('../property.js')
+var Property = require('observ-default')
 
 module.exports = OscillatorNode
 

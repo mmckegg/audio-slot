@@ -1,6 +1,6 @@
 var computed = require('observ/computed')
 var ObservStruct = require('observ-struct')
-var Property = require('../property.js')
+var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Apply = require('audio-slot-param/apply')

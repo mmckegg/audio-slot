@@ -2,7 +2,7 @@ var watch = require('observ/watch')
 
 var Freeverb = require('freeverb')
 var Processor = require('../processor.js')
-var Property = require('../property.js')
+var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Apply = require('audio-slot-param/apply')

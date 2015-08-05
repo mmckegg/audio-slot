@@ -4,7 +4,7 @@ var NodeArray = require('observ-node-array')
 var nextTick = require('next-tick')
 
 var Param = require('audio-slot-param')
-var Property = require('./property.js')
+var Property = require('observ-default')
 
 module.exports = AudioSlot
 

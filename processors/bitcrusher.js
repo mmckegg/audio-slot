@@ -1,6 +1,6 @@
 var Processor = require('../processor.js')
 var Param = require('audio-slot-param')
-var Property = require('../property.js')
+var Property = require('observ-default')
 var Bitcrusher = require('bitcrusher')
 var watch = require('observ/watch')
 

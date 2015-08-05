@@ -1,6 +1,6 @@
 var watch = require('observ/watch')
 var Processor = require('../processor.js')
-var Property = require('../property.js')
+var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')

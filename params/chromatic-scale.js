@@ -1,5 +1,5 @@
 var ObservStruct = require('observ-struct')
-var Property = require('../property.js')
+var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
