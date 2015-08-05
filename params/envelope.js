@@ -36,10 +36,6 @@ function Envelope(context){
   obs.getValueAt = outputValue.getValueAt
   obs.onSchedule = outputValue.onSchedule
 
-  obs.onSchedule(function(data) {
-    console.log(data)
-  })
-
   obs.context = context
 
   obs.triggerOn = function(at){
