@@ -6,7 +6,7 @@ var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
 var Apply = require('audio-slot-param/apply')
 
-var ResolvedValue = require('../resolved-value')
+var ResolvedValue = require('observ-node-array/resolved-value')
 var SyncProperty = require('../lib/granular-sync')
 var applyScheduler = require('../lib/apply-scheduler')
 
