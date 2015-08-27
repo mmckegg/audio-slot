@@ -59,6 +59,8 @@ function DelayNode (context) {
     filter.type = value
   })
 
+  filter.Q.value = 0
+
   Apply(context, wet.gain, obs.wet)
   Apply(context, dry.gain, obs.dry)
 
