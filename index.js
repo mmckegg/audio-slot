@@ -5,6 +5,7 @@ var nextTick = require('next-tick')
 
 var Param = require('audio-slot-param')
 var Property = require('observ-default')
+var RoutableSlot = require('./routable')
 
 module.exports = AudioSlot
 
@@ -27,30 +28,18 @@ function AudioSlot (parentContext) {
   toProcessors.connect(post)
   post.connect(output)
 
-  var obs = ObservStruct({
+  var obs = RoutableSlot(context, {
     id: Observ(),
     sources: NodeArray(context),
     processors: NodeArray(context),
     noteOffset: Param(context, 0),
     output: Observ(),
     volume: Property(1)
-  })
+  }, input, output)
 
   obs._type = 'AudioSlot'
-  obs.context = context
   context.noteOffset = obs.noteOffset
   context.slot = obs
-
-  obs.volume(function (value) {
-    output.gain.value = value
-  })
-
-  obs.input = input
-
-  // main output
-  obs.output(queueRefreshConnections)
-
-  var removeSlotWatcher = context.slotLookup && context.slotLookup(refreshConnections)
 
   // reconnect sources on add / update
   var connectedSources = []
@@ -143,52 +132,9 @@ function AudioSlot (parentContext) {
     })
   }
 
-  obs.connect = function (to) {
-    extraConnections.push(to)
-    refreshConnections()
-  }
-
-  obs.disconnect = function () {
-    extraConnections.length = 0
-    refreshConnections()
-  }
-
-  obs.destroy = function () {
-    removeSlotWatcher && removeSlotWatcher()
-    removeSlotWatcher = null
-  }
-
   return obs
 
   // scoped
-
-  function queueRefreshConnections () {
-    if (!refreshingConnections) {
-      refreshingConnections = true
-      nextTick(refreshConnections)
-    }
-  }
-
-  function refreshConnections () {
-    refreshingConnections = false
-
-    output.disconnect()
-
-    extraConnections.forEach(function (target) {
-      output.connect(target)
-    })
-
-    var outputNames = typeof obs.output() === 'string' ? [obs.output()] : obs.output()
-
-    if (Array.isArray(outputNames)) {
-      outputNames.forEach(function (name) {
-        var destinationSlot = context.slotLookup.get(name)
-        if (destinationSlot && destinationSlot.input) {
-          output.connect(destinationSlot.input)
-        }
-      })
-    }
-  }
 
   function updateProcessors () {
     if (checkProcessorsChanged()) {
