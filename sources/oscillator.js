@@ -27,6 +27,7 @@ function OscillatorNode (context) {
 
   var obs = ObservStruct({
     amp: Param(context, 1),
+    frequency: Param(context, 440),
     noteOffset: Param(context, 0),
     octave: Param(context, 0),
     detune: Param(context, 0),
@@ -39,7 +40,8 @@ function OscillatorNode (context) {
 
   obs.context = context
 
-  var frequency = Transform(context, [ 440,
+  var frequency = Transform(context, [ 
+    { param: obs.frequency },
     { param: obs.octave, transform: transformOctave },
     { param: obs.noteOffset, transform: transformNote },
     { param: context.noteOffset, transform: transformNote }
