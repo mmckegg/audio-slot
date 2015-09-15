@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "array-union": "^1.0.1",
-    "audio-slot-param": "~1.0.3",
+    "audio-slot-param": "~1.1.0",
     "bitcrusher": "^0.3.0",
     "deep-equal": "~0.2.1",
     "freeverb": "^1.0.2",
