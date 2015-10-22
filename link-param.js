@@ -28,8 +28,8 @@ function LinkParam (context) {
   var outputValue = Transform(context, [
     { param: obs.mode },
     { param: obs.value, transform: applyInterpolation },
-    { param: Transform(context, [
-        { param: obs.maxValue },
+    { param: Transform(context,
+      [ { param: obs.maxValue },
         { param: obs.minValue, transform: subtract }
       ]), transform: multiply
     },
@@ -72,20 +72,25 @@ function LinkParam (context) {
       setImmediate(updateNow)
     }
   }
+
+  function applyInterpolation (mode, value) {
+    if (mode === 'exp') {
+      if (obs.minValue() < obs.maxValue()) {
+        return value * value
+      } else {
+        var i = 1 - value
+        return 1 - (i * i)
+      }
+    } else { // linear
+      return value
+    }
+  }
 }
 
 function quantize (value, grid) {
   if (grid) {
     return Math.round(value * grid) / grid
   } else {
-    return value
-  }
-}
-
-function applyInterpolation (mode, value) {
-  if (mode === 'exp') {
-    return value * value
-  } else { // linear
     return value
   }
 }
