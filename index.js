@@ -9,7 +9,7 @@ var RoutableSlot = require('./routable')
 
 module.exports = AudioSlot
 
-function AudioSlot (parentContext) {
+function AudioSlot (parentContext, defaultValue) {
   var context = Object.create(parentContext)
   var audioContext = context.audio
 
@@ -132,6 +132,9 @@ function AudioSlot (parentContext) {
     })
   }
 
+  if (defaultValue) {
+    obs.set(defaultValue)
+  }
   return obs
 
   // scoped
