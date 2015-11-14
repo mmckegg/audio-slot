@@ -20,6 +20,9 @@ function AudioSlot (parentContext, defaultValue) {
   var toProcessors = audioContext.createGain()
   var post = audioContext.createGain()
 
+  var initialized = false
+  var queue = []
+
   var refreshingConnections = false
   var extraConnections = []
 
@@ -65,6 +68,14 @@ function AudioSlot (parentContext, defaultValue) {
   })
 
   obs.triggerOn = function (at) {
+
+    if (!initialized) {
+      queue.push(function () {
+        obs.triggerOn(at)
+      })
+      return false
+    }
+
     var offTime = null
 
     obs.sources.forEach(function (source) {
@@ -88,6 +99,14 @@ function AudioSlot (parentContext, defaultValue) {
   }
 
   obs.triggerOff = function (at) {
+
+    if (!initialized) {
+      queue.push(function () {
+        obs.triggerOff(at)
+      })
+      return false
+    }
+
     var maxProcessorDuration = 0
     var maxSourceDuration = 0
 
@@ -135,6 +154,14 @@ function AudioSlot (parentContext, defaultValue) {
   if (defaultValue) {
     obs.set(defaultValue)
   }
+
+  process.nextTick(function () {
+    initialized = true
+    while (queue.length) {
+      queue.shift()()
+    }
+  })
+
   return obs
 
   // scoped
