@@ -1,7 +1,7 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var Event = require('geval')
-var nextTick = require('next-tick')
+var setImmediate = require('setimmediate2').setImmediate
 
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
@@ -54,7 +54,7 @@ function ParamModulator (context) {
 
   obs.param(handleUpdate)
 
-  nextTick(transformedValue.resend)
+  setImmediate(transformedValue.resend)
 
   obs.destroy = function () {
     releaseParams && releaseParams()

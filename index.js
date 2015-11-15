@@ -1,7 +1,7 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
 var NodeArray = require('observ-node-array')
-var nextTick = require('next-tick')
+var setImmediate = require('setimmediate2').setImmediate
 
 var Param = require('audio-slot-param')
 var Property = require('observ-default')
@@ -62,7 +62,7 @@ function AudioSlot (parentContext, defaultValue) {
 
   obs.processors.onUpdate(function (diff) {
     if (!updatingProcessors) {
-      nextTick(updateProcessors)
+      setImmediate(updateProcessors)
     }
     updatingProcessors = true
   })
@@ -155,7 +155,7 @@ function AudioSlot (parentContext, defaultValue) {
     obs.set(defaultValue)
   }
 
-  process.nextTick(function () {
+  setImmediate(function () {
     initialized = true
     while (queue.length) {
       queue.shift()()

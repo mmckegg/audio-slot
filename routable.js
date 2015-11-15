@@ -1,6 +1,6 @@
 var Observ = require('observ')
 var ObservStruct = require('observ-struct')
-var nextTick = require('next-tick')
+var setImmediate = require('setimmediate2').setImmediate
 
 var Property = require('observ-default')
 var extend = require('xtend')
@@ -58,7 +58,7 @@ function RoutableSlot (context, properties, input, output) {
   function queueRefreshConnections () {
     if (!refreshingConnections) {
       refreshingConnections = true
-      nextTick(refreshConnections)
+      setImmediate(refreshConnections)
     }
   }
 
@@ -83,4 +83,3 @@ function RoutableSlot (context, properties, input, output) {
     }
   }
 }
-
