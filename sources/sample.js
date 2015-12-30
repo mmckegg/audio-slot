@@ -33,8 +33,7 @@ function SampleNode (context) {
   var amp = null
   var lastChoke = 0
 
-  var releaseAmp = null
-  var releaseRate = null
+  var releases = []
   var playTo = false
 
   var triggerOnRelease = false
@@ -60,6 +59,11 @@ function SampleNode (context) {
       lastChoke = at
       choker.gain.setTargetAtTime(0, at, 0.02)
     }
+
+    // clean up
+    while (releases.length) {
+      releases.pop()()
+    }
   }
 
   obs.triggerOn = function (at) {
@@ -74,8 +78,11 @@ function SampleNode (context) {
       amp = context.audio.createGain()
       player = context.audio.createBufferSource()
 
-      releaseAmp = Apply(context, amp.gain, obs.amp)
-      releaseRate = Apply(context, player.playbackRate, playbackRate)
+      releases.push(
+        Apply(context, amp.gain, obs.amp),
+        Apply(context, player.playbackRate, playbackRate)
+      )
+
       // nice fade on retrigger (after choke)
       if (Math.abs(at - lastChoke) < 0.02) {
         choker.gain.setValueAtTime(0, at)
@@ -104,9 +111,8 @@ function SampleNode (context) {
         var duration = (player.loopEnd - player.loopStart) / playbackRate.getValueAt(at)
         var maxDuration = buffer.duration - player.loopStart / playbackRate.getValueAt(at)
         var extra = Math.max(0, obs.getReleaseDuration() - maxDuration)
-        var stopAt = obs.triggerOff(at + duration - extra)
+        obs.triggerOff(at + duration - extra)
         isOneshot = true
-        return stopAt
       } else {
         player.start(at, player.loopStart, player.loopEnd - player.loopStart)
         Param.triggerOn(obs, at)
@@ -150,8 +156,6 @@ function SampleNode (context) {
     if (!playTo && player) {
       playTo = at
       player.stop(at)
-      releaseAmp()
-      releaseRate()
     }
   }
 }
