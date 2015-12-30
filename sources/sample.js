@@ -98,10 +98,13 @@ function SampleNode (context) {
       } else if (mode === 'release') {
         triggerOnRelease = true
       } else if (mode === 'oneshot') {
-        player.start(at, player.loopStart, player.loopEnd - player.loopStart)
+        player.start(at, player.loopStart)
         Param.triggerOn(obs, at)
 
-        var stopAt = obs.triggerOff(at + player.loopEnd - player.loopStart - obs.getReleaseDuration())
+        var duration = (player.loopEnd - player.loopStart) / playbackRate.getValueAt(at)
+        var maxDuration = buffer.duration - player.loopStart / playbackRate.getValueAt(at)
+        var extra = Math.max(0, obs.getReleaseDuration() - maxDuration)
+        var stopAt = obs.triggerOff(at + duration - extra)
         isOneshot = true
         return stopAt
       } else {
