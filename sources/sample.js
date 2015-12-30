@@ -31,6 +31,7 @@ function SampleNode (context) {
   var player = null
   var choker = null
   var amp = null
+  var lastChoke = 0
 
   var releaseAmp = null
   var releaseRate = null
@@ -56,6 +57,7 @@ function SampleNode (context) {
   obs.choke = function (at) {
     stop(at + (0.02 * 6))
     if (choker && at < playTo) {
+      lastChoke = at
       choker.gain.setTargetAtTime(0, at, 0.02)
     }
   }
@@ -74,6 +76,11 @@ function SampleNode (context) {
 
       releaseAmp = Apply(context, amp.gain, obs.amp)
       releaseRate = Apply(context, player.playbackRate, playbackRate)
+      // nice fade on retrigger (after choke)
+      if (Math.abs(at - lastChoke) < 0.02) {
+        choker.gain.setValueAtTime(0, at)
+        choker.gain.setTargetAtTime(1, at, 0.001)
+      }
 
       player.connect(amp)
       amp.connect(choker)
