@@ -3,6 +3,7 @@ var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Apply = require('audio-slot-param/apply')
+var Transform = require('audio-slot-param/transform')
 
 module.exports = EQNode
 
@@ -38,14 +39,21 @@ function EQNode (context) {
     lowcut: Param(context, 0),
     low: Param(context, 0),
     mid: Param(context, 0),
-    high: Param(context, 0),
+    high: Param(context, 0)
   })
 
-  Apply(context, lowpass.frequency, obs.highcut)
+  Apply(context, lowpass.frequency, Transform(context, [
+    { param: obs.highcut, transform: clampMin20 }
+  ]))
+
   Apply(context, highpass.frequency, obs.lowcut)
   Apply(context, lowshelf.gain, obs.low)
   Apply(context, peaking.gain, obs.mid)
   Apply(context, highshelf.gain, obs.high)
 
   return obs
+}
+
+function clampMin20 (_, val) {
+  return Math.max(20, val)
 }
