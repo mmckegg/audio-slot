@@ -14,6 +14,7 @@ function ReverbNode (context) {
 
   var convolver = context.audio.createConvolver(4)
   var filter = context.audio.createBiquadFilter()
+  filter.Q.value = 0
 
   var dry = context.audio.createGain()
   var wet = context.audio.createGain()
