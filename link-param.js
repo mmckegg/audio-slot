@@ -23,6 +23,7 @@ function LinkParam (context) {
 
   var updating = false
   var releaseParams = null
+  var onDestroy = []
 
   // transform: value * (maxValue - minValue) + minValue
   var outputValue = Transform(context, [
@@ -48,9 +49,16 @@ function LinkParam (context) {
     releaseParams = context.paramLookup(handleUpdate)
   }
 
+  if (context.active) {
+    onDestroy.push(context.active(handleUpdate))
+  }
+
   obs.param(handleUpdate)
 
   obs.destroy = function () {
+    while (onDestroy.length) {
+      onDestroy.pop()()
+    }
     releaseParams && releaseParams()
     releaseParams = null
     obs.value.destroy()
@@ -61,8 +69,12 @@ function LinkParam (context) {
   // scoped
 
   function updateNow () {
-    var param = context.paramLookup.get(obs.param())
-    obs.value.setTarget(param)
+    if (!context.active || context.active()) {
+      var param = context.paramLookup.get(obs.param())
+      obs.value.setTarget(param)
+    } else {
+      obs.value.setTarget(null)
+    }
     updating = false
   }
 
