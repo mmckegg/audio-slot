@@ -4,6 +4,7 @@ var Event = require('geval')
 
 var Param = require('audio-slot-param')
 var Transform = require('audio-slot-param/transform')
+var setImmediate = require('setimmediate2').setImmediate
 
 module.exports = Envelope
 
@@ -82,6 +83,13 @@ function Envelope (context) {
   obs.getReleaseDuration = function () {
     return obs.release()
   }
+
+  setImmediate(function () {
+    broadcast({
+      value: 0,
+      at: context.audio.currentTime
+    })
+  })
 
   return obs
 }
