@@ -12,8 +12,10 @@ module.exports = FreeverbNode
 
 function FreeverbNode (context) {
   var reverb = Freeverb(context.audio)
+  var output = context.audio.createGain()
+  reverb.connect(output)
 
-  var obs = Processor(context, reverb, reverb, {
+  var obs = Processor(context, reverb, output, {
     roomSize: Property(0.8),
     dampening: Property(3000),
     wet: Param(context, 1),
