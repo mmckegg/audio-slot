@@ -6,6 +6,7 @@ var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Apply = require('audio-slot-param/apply')
+var Transform = require('audio-slot-param/transform')
 
 module.exports = FreeverbNode
 
@@ -27,8 +28,14 @@ function FreeverbNode (context) {
     reverb.dampening = Math.min(20000, Math.max(0, value))
   })
 
-  Apply(context, reverb.wet, obs.wet)
+  Apply(context, reverb.wet, Transform(context, [
+    obs.wet, { value: 4, transform: divide }
+  ]))
   Apply(context, reverb.dry, obs.dry)
 
   return obs
+}
+
+function divide (a, b) {
+  return a / b
 }
