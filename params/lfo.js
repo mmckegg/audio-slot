@@ -142,6 +142,10 @@ function LFO (context) {
   }
 
   function scheduleEvent (event, from, to, beatDuration) {
+    if (event.nextTime < from) {
+      event.nextTime = from
+    }
+
     if (event.start <= from && (!event.end || event.end > to)) {
       var rate = obs.rate.getValueAt(from)
 
