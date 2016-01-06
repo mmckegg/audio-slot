@@ -40,7 +40,7 @@ function OscillatorNode (context) {
 
   obs.context = context
 
-  var frequency = Transform(context, [ 
+  var frequency = Transform(context, [
     { param: obs.frequency },
     { param: obs.octave, transform: transformOctave },
     { param: obs.noteOffset, transform: transformNote },
@@ -57,6 +57,12 @@ function OscillatorNode (context) {
   obs.shape(refreshShape)
 
   obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
+
+  obs.choke = function (at) {
+    if (choker) {
+      choker.gain.setTargetAtTime(0, at, 0.02)
+    }
+  }
 
   obs.triggerOn = function (at) {
     at = at || context.audio.currentTime
