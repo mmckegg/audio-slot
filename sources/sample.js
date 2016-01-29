@@ -153,7 +153,7 @@ function SampleNode (context) {
   // scoped
 
   function stop (at) {
-    if (!playTo && player) {
+    if ((!playTo || at < playTo) && player) {
       playTo = at
       player.stop(at)
     }
