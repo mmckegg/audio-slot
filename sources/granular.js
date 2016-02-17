@@ -207,19 +207,17 @@ function GranularNode (context) {
       }
 
       source.start(at, startOffset * duration + start)
-      source.stop(releaseAt + release)
+      source.stop(releaseAt + release * 2)
 
       var envelope = context.audio.createGain()
+      envelope.gain.value = 0
       source.connect(envelope)
 
       // envelope
       if (attack) {
-        envelope.gain.setValueAtTime(0, at)
-        envelope.gain.linearRampToValueAtTime(1, Math.min(attack, grainDuration) + at)
+        envelope.gain.setTargetAtTime(1, at, attack / 4)
       }
-      envelope.gain.setValueAtTime(1, releaseAt)
-      envelope.gain.linearRampToValueAtTime(0, releaseAt + release)
-
+      envelope.gain.setTargetAtTime(0, releaseAt, release / 4)
       envelope.connect(output)
     }
   }
@@ -241,7 +239,6 @@ function GranularNode (context) {
       }
     }
   }
-
 }
 
 function noteOffsetToRate (baseRate, value) {
