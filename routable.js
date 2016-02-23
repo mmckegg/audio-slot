@@ -13,6 +13,7 @@ function RoutableSlot (context, properties, input, output) {
   output = output || input
 
   var refreshingConnections = false
+  var connections = []
   var extraConnections = []
 
   var obs = ObservStruct(extend({
@@ -34,14 +35,20 @@ function RoutableSlot (context, properties, input, output) {
 
   var removeSlotWatcher = context.slotLookup && context.slotLookup(queueRefreshConnections)
 
-  obs.connect = function (to) {
-    extraConnections.push(to)
-    refreshConnections()
+  obs.connect = function (destination) {
+    output.connect(destination)
+    extraConnections.push(destination)
   }
 
-  obs.disconnect = function () {
-    extraConnections.length = 0
-    refreshConnections()
+  obs.disconnect = function (destination) {
+    if (destination) {
+      remove(extraConnections, destination)
+      output.disconnect(destination)
+    } else {
+      while (extraConnections.length) {
+        output.disconnect(extraConnections.pop())
+      }
+    }
   }
 
   obs.destroy = function () {
@@ -63,23 +70,38 @@ function RoutableSlot (context, properties, input, output) {
   }
 
   function refreshConnections () {
+    var outputs = []
     refreshingConnections = false
-
-    output.disconnect()
-
-    extraConnections.forEach(function (target) {
-      output.connect(target)
-    })
-
     var outputNames = typeof obs.output() === 'string' ? [obs.output()] : obs.output()
 
     if (Array.isArray(outputNames)) {
       outputNames.forEach(function (name) {
         var destinationSlot = context.slotLookup.get(name)
         if (destinationSlot && destinationSlot.input) {
-          output.connect(destinationSlot.input)
+          outputs.push(destinationSlot.input)
         }
       })
     }
+
+    connections.forEach(function (node) {
+      if (!~outputs.indexOf(node)) {
+        output.disconnect(node)
+      }
+    })
+
+    outputs.forEach(function (node) {
+      if (!~connections.indexOf(node)) {
+        output.connect(node)
+      }
+    })
+
+    connections = outputs
+  }
+}
+
+function remove (array, item) {
+  var index = array.indexOf(item)
+  if (~index) {
+    array.splice(index, 1)
   }
 }
