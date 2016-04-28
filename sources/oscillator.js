@@ -1,42 +1,30 @@
-var ObservStruct = require('observ-struct')
-
+var Triggerable = require('../triggerable')
 var Param = require('audio-slot-param')
+var Property = require('observ-default')
 var Transform = require('audio-slot-param/transform')
 var Apply = require('audio-slot-param/apply')
-var applyScheduler = require('../lib/apply-scheduler')
+var watch = require('observ/watch')
 
-var Property = require('observ-default')
+var ScheduleEvent = require('../lib/schedule-event')
 
 module.exports = OscillatorNode
 
 function OscillatorNode (context) {
-  var oscillator = null
-  var power = context.audio.createGain()
-  var amp = context.audio.createGain()
-  var choker = context.audio.createGain()
   var output = context.audio.createGain()
-
-  choker.gain.value = 0
+  var amp = context.audio.createGain()
+  var power = context.audio.createGain()
   amp.gain.value = 0
-
   power.connect(amp)
-  amp.connect(choker)
+  amp.connect(output)
 
-  var releaseSchedule = applyScheduler(context, handleSchedule)
-  var releaseSync = []
-
-  var obs = ObservStruct({
+  var obs = Triggerable(context, {
     amp: Param(context, 1),
     frequency: Param(context, 440),
     noteOffset: Param(context, 0),
     octave: Param(context, 0),
     detune: Param(context, 0),
     shape: Property('sine') // Param(context, multiplier.gain, 1)
-  })
-
-  var maxTime = null
-  var lastOn = -1
-  var lastOff = 0
+  }, trigger)
 
   obs.context = context
 
@@ -51,108 +39,43 @@ function OscillatorNode (context) {
     { param: frequency, transform: frequencyToPowerRolloff }
   ])
 
-  Apply(context, amp.gain, obs.amp)
   Apply(context, power.gain, powerRolloff)
-
-  obs.shape(refreshShape)
-
-  obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
-
-  obs.choke = function (at) {
-    if (choker) {
-      choker.gain.setTargetAtTime(0, at, 0.02)
-    }
-  }
-
-  obs.triggerOn = function (at) {
-    at = at || context.audio.currentTime
-    choker.connect(output)
-    choker.gain.cancelScheduledValues(at)
-    choker.gain.setValueAtTime(1, at)
-
-    // start modulators
-    Param.triggerOn(obs, at)
-
-    maxTime = null
-
-    if (lastOn < at) {
-      lastOn = at
-    }
-  }
-
-  obs.triggerOff = function (at) {
-    at = at || context.audio.currentTime
-    var stopAt = obs.getReleaseDuration() + at
-
-    // stop modulators
-    Param.triggerOff(obs, stopAt)
-
-    choker.gain.setValueAtTime(0, stopAt)
-
-    if (stopAt > maxTime) {
-      maxTime = stopAt
-    }
-
-    if (lastOff < at) {
-      lastOff = at
-    }
-  }
-
-  obs.destroy = function () {
-    // release context.noteOffset
-    frequency.destroy()
-    releaseSchedule && releaseSchedule()
-    releaseSchedule = null
-  }
+  Apply(context, amp.gain, obs.amp)
 
   obs.connect = output.connect.bind(output)
   obs.disconnect = output.disconnect.bind(output)
 
-  resync()
   return obs
 
-  //
+  // scoped
+  function trigger (at) {
+    var oscillator = context.audio.createOscillator()
+    var choker = context.audio.createGain()
+    oscillator.start(at)
+    oscillator.connect(choker)
+    choker.connect(amp)
 
-  function handleSchedule (schedule) {
-    if (maxTime && context.audio.currentTime > maxTime) {
-      maxTime = null
-      choker.disconnect()
-      resync()
-    }
-  }
-
-  function resync () {
-    while (releaseSync.length) {
-      releaseSync.pop()()
-    }
-
-    if (oscillator) {
-      oscillator.disconnect()
-    }
-
-    oscillator = context.audio.createOscillator()
-    oscillator.lastShape = 'sine'
-
-    refreshShape()
-    oscillator.connect(power)
-    oscillator.start()
-
-    releaseSync.push(
+    return new ScheduleEvent(at, oscillator, choker, [
       Apply(context, oscillator.detune, obs.detune),
-      Apply(context, oscillator.frequency, frequency)
-    )
+      Apply(context, oscillator.frequency, frequency),
+      ApplyShape(context, oscillator, obs.shape),
+      choker.disconnect.bind(choker)
+    ])
   }
+}
 
-  function refreshShape () {
-    var shape = obs.shape()
-    if (shape !== oscillator.lastShape) {
-      if (context.periodicWaves && context.periodicWaves[shape]) {
-        oscillator.setPeriodicWave(context.periodicWaves[shape])
-      } else {
-        oscillator.type = shape
-      }
-      oscillator.lastShape = shape
+function ApplyShape (context, target, shape) {
+  return watch(shape, setShape.bind(this, context, target))
+}
+
+function setShape (context, target, value) {
+  if (value !== target.lastShape) {
+    if (context.periodicWaves && context.periodicWaves[value]) {
+      target.setPeriodicWave(context.periodicWaves[value])
+    } else {
+      target.type = value
     }
+    target.lastShape = value
   }
 }
 
