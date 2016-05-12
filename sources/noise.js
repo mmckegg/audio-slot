@@ -1,78 +1,37 @@
-var computed = require('observ/computed')
+var computed = require('../lib/computed-next-tick')
 var ObservStruct = require('observ-struct')
 var Property = require('observ-default')
 
 var Param = require('audio-slot-param')
 var Apply = require('audio-slot-param/apply')
+var Triggerable = require('../triggerable')
+var ScheduleEvent = require('../lib/schedule-event')
 
 module.exports = NoiseNode
 
 function NoiseNode (context) {
   var output = context.audio.createGain()
+  var amp = context.audio.createGain()
+  amp.gain.value = 0
+  amp.connect(output)
 
-  var obs = ObservStruct({
+  var obs = Triggerable(context, {
     type: Property('white'),
     stereo: Property(false),
     amp: Param(context, 0.4)
+  }, trigger)
+
+  obs.resolvedBuffer = computed([obs.type, obs.stereo], function (type, stereo) {
+    if (type === 'pink') {
+      return generatePinkNoise(context.audio, 4096 * 4, stereo ? 2 : 1)
+    } else {
+      return generateWhiteNoise(context.audio, 4096 * 4, stereo ? 2 : 1)
+    }
   })
 
   obs.context = context
 
-  obs.resolvedBuffer = computed([obs.type, obs.stereo], function (type, stereo) {
-    if (type === 'pink') {
-      return generatePinkNoise(context.audio, 4096 * 2, stereo ? 2 : 1)
-    } else {
-      return generateWhiteNoise(context.audio, 4096 * 2, stereo ? 2 : 1)
-    }
-  })
-
-  var player = null
-  var choker = null
-  var amp = null
-  var releaseAmp = null
-  var playTo = false
-
-  obs.getReleaseDuration = Param.getReleaseDuration.bind(this, obs)
-
-  obs.choke = function (at) {
-    stop(at + (0.02 * 6))
-    if (choker && at < playTo) {
-      choker.gain.setTargetAtTime(0, at, 0.02)
-    }
-  }
-
-  obs.triggerOn = function (at) {
-    obs.choke(at)
-
-    var buffer = obs.resolvedBuffer()
-
-    if (buffer instanceof window.AudioBuffer) {
-      choker = context.audio.createGain()
-      amp = context.audio.createGain()
-      player = context.audio.createBufferSource()
-
-      amp.gain.value = 0
-
-      releaseAmp = Apply(context, amp.gain, obs.amp)
-
-      player.connect(amp)
-      amp.connect(choker)
-      choker.connect(output)
-
-      player.buffer = buffer
-      player.loop = true
-
-      player.start(at, 0)
-      Param.triggerOn(obs, at)
-    }
-  }
-
-  obs.triggerOff = function (at) {
-    at = at || context.audio.currentTime
-    var stopAt = obs.getReleaseDuration() + at
-    Param.triggerOff(obs, stopAt)
-    stop(stopAt)
-  }
+  Apply(context, amp.gain, obs.amp)
 
   obs.connect = output.connect.bind(output)
   obs.disconnect = output.disconnect.bind(output)
@@ -80,12 +39,22 @@ function NoiseNode (context) {
   return obs
 
   // scoped
+  function trigger (at) {
+    var buffer = obs.resolvedBuffer()
 
-  function stop (at) {
-    if (player) {
-      playTo = at
-      player.stop(at)
-      releaseAmp()
+    if (buffer instanceof window.AudioBuffer) {
+      var choker = context.audio.createGain()
+      var player = context.audio.createBufferSource()
+      player.connect(choker)
+      choker.connect(amp)
+
+      player.buffer = buffer
+      player.loop = true
+      player.start(at, 0)
+
+      return new ScheduleEvent(at, player, choker, [
+        choker.disconnect.bind(choker)
+      ])
     }
   }
 }
