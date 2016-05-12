@@ -24,5 +24,9 @@ function ProcessorNode (context, input, output, params) {
     Param.triggerOff(obs, stopAt)
   }
 
+  obs.cancelFrom = function (at) {
+    Param.cancelFrom(obs, at)
+  }
+
   return obs
 }

@@ -46,6 +46,7 @@ function Triggerable (context, params, trigger) {
 
     var event = scheduled.getLast()
     if (event) {
+      Param.cancelFrom(obs, at)
       event.cancelChoke()
     }
   }
