@@ -18,6 +18,8 @@
     "deep-equal": "~0.2.1",
     "freeverb": "^1.0.2",
     "geval": "^2.1.1",
+    "make-distortion-curve": "^1.0.0",
+    "noise-buffer": "^2.0.0",
     "observ": "^0.2.0",
     "observ-default": "^1.0.0",
     "observ-node-array": "^1.10.0",

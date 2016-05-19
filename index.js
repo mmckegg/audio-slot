@@ -136,12 +136,21 @@ function AudioSlot (parentContext, defaultValue) {
       var target = event[0]
       var releaseDuration = event[1]
 
+      if (target.cancelFrom) {
+        target.cancelFrom(at)
+      }
+
       if (event[2]) {
         target.triggerOff(at + maxDuration - releaseDuration)
       } else {
         target.triggerOff(at + Math.max(0, difference))
       }
+    })
+  }
 
+  obs.cancelFrom = function (at) {
+    obs.sources.forEach(function (source) {
+      source.cancelFrom && source.cancelFrom(at)
     })
   }
 
