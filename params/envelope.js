@@ -12,8 +12,8 @@ function Envelope (context) {
   var obs = ObservStruct({
     attack: Property(0),
     decay: Property(0),
-    sustain: Property(1),
     release: Property(0),
+    sustain: Param(context, 1),
     value: Param(context, 1)
   })
 
@@ -56,7 +56,7 @@ function Envelope (context) {
 
     // decay / sustain
     broadcast({
-      value: obs.sustain(),
+      value: obs.sustain.getValueAt(peakTime),
       at: peakTime,
       duration: obs.decay(),
       mode: 'log'
