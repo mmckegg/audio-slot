@@ -23,9 +23,6 @@ function AudioSlot (parentContext, defaultValue) {
   var initialized = false
   var queue = []
 
-  var refreshingConnections = false
-  var extraConnections = []
-
   input.connect(pre)
   pre.connect(toProcessors)
   toProcessors.connect(post)
