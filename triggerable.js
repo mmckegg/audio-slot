@@ -14,13 +14,15 @@ function Triggerable (context, params, trigger) {
   obs.triggerOn = function (at) {
     obs.choke(at)
     var event = trigger(at)
-    scheduled.push(event)
-    Param.triggerOn(obs, at)
+    if (event) {
+      scheduled.push(event)
+      Param.triggerOn(obs, at)
 
-    if (event.to) {
-      var stopAt = Math.max(at + obs.getReleaseDuration(), event.to)
-      event.stop(stopAt)
-      Param.triggerOff(obs, stopAt + 0.0001)
+      if (event.to) {
+        var stopAt = Math.max(at + obs.getReleaseDuration(), event.to)
+        event.stop(stopAt)
+        Param.triggerOff(obs, stopAt + 0.0001)
+      }
     }
   }
 

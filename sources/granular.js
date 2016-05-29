@@ -157,7 +157,10 @@ function handleSchedule (schedule) {
     var duration = length / slices
 
     while (this.nextTime < endTime) {
-      this.events.push(play.call(this, this.nextTime, this.nextOffset, duration))
+      var event = play.call(this, this.nextTime, this.nextOffset, duration)
+      if (event) {
+        this.events.push(event)
+      }
       this.nextTime += duration
       this.nextOffset += 1 / slices
       if (obs.mode() !== 'oneshot') {
@@ -212,13 +215,13 @@ function play (at, startOffset, grainDuration) {
     }
     envelope.gain.setTargetAtTime(0, releaseAt, release / 4)
     envelope.connect(this.choker)
+
+    var event = new ScheduleEvent(at, source, envelope, [
+      Apply(context, source.playbackRate, this.playbackRate)
+    ])
+
+    event.to = releaseAt + release
+
+    return event
   }
-
-  var event = new ScheduleEvent(at, source, envelope, [
-    Apply(context, source.playbackRate, this.playbackRate)
-  ])
-
-  event.to = releaseAt + release
-
-  return event
 }
