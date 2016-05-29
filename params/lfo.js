@@ -30,7 +30,7 @@ function LFO (context) {
     amp: Param(context, 1),
     value: Param(context, 1),
 
-    curve: Param(context, 0.5),
+    curve: Param(context, 1),
     skew: Param(context, 0)
   })
 
@@ -54,7 +54,7 @@ function LFO (context) {
   }
 
   var transform = Transform(context, [
-    { param: eventSource },
+    { param: eventSource, transform: offsetForOperation },
     { param: obs.amp, transform: multiply },
     { param: obs.value, transform: operation }
   ])
@@ -167,14 +167,12 @@ function LFO (context) {
   }
 
   function step (start, duration) {
-    var skew = clamp((obs.skew.getValueAt(start) + 1) / 2, 0, 0.999999999)
+    var skew = clamp((obs.skew.getValueAt(start) + 1), 0, 1.9999999999)
     var curve = clamp(obs.curve.getValueAt(start), 0, 1)
-
     var stepDuration = duration / 4
     var up = stepDuration * skew * curve
-    var down = stepDuration * (1 - skew) * curve
-    var mid = start + (duration * skew)
-    var end = start + duration
+    var pause = (stepDuration - curve * stepDuration) * 2
+    var down = stepDuration * (2 - skew) * curve
 
     broadcast({
       at: start,
@@ -183,23 +181,33 @@ function LFO (context) {
     })
 
     broadcast({
-      at: mid - down,
+      at: start + up + pause,
       value: 0,
       duration: down
     })
 
     broadcast({
-      at: mid + up,
+      at: start + up + pause + down,
       value: -1,
+      duration: down
+    })
+
+    broadcast({
+      at: start + up + pause + down + down + pause,
+      value: 0,
       duration: up
     })
+  }
 
-    broadcast({
-      at: end - down,
-      value: 0,
-      duration: down
-    })
-
+  function offsetForOperation (_, value) {
+    var mode = obs.mode()
+    if (mode === 'add') {
+      return value
+    } else if (mode === 'subtract') {
+      return value
+    } else {
+      return (value + 1) / 2
+    }
   }
 
   function operation (base, value) {
