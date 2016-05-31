@@ -10,9 +10,9 @@ module.exports = Envelope
 
 function Envelope (context) {
   var obs = ObservStruct({
-    attack: Property(0),
-    decay: Property(0),
-    release: Property(0),
+    attack: Param(context, 0),
+    decay: Param(context, 0),
+    release: Param(context, 0),
     sustain: Param(context, 1),
     value: Param(context, 1)
   })
@@ -29,7 +29,7 @@ function Envelope (context) {
 
   var outputValue = Transform(context, [
     { param: obs.value },
-    { param: eventSource, transform: multiply }
+    { param: eventSource, transform: multiply, watchingYou: true }
   ])
 
   obs.getValueAt = outputValue.getValueAt
@@ -44,10 +44,9 @@ function Envelope (context) {
 
     if (obs.attack()) {
       broadcast({
-        fromValue: 0,
         value: 1,
         at: at,
-        duration: obs.attack(),
+        duration: obs.attack.getValueAt(at),
         mode: 'log'
       })
     } else {
@@ -58,7 +57,7 @@ function Envelope (context) {
     broadcast({
       value: obs.sustain.getValueAt(peakTime),
       at: peakTime,
-      duration: obs.decay(),
+      duration: obs.decay.getValueAt(peakTime),
       mode: 'log'
     })
   }
@@ -70,7 +69,7 @@ function Envelope (context) {
     if (obs.release()) {
       broadcast({
         value: 0, at: at,
-        duration: obs.release(),
+        duration: obs.release.getValueAt(at),
         mode: 'log'
       })
     } else {
