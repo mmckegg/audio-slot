@@ -133,10 +133,6 @@ function AudioSlot (parentContext, defaultValue) {
       var target = event[0]
       var releaseDuration = event[1]
 
-      if (target.cancelFrom) {
-        target.cancelFrom(at)
-      }
-
       if (event[2]) {
         target.triggerOff(at + maxDuration - releaseDuration)
       } else {
