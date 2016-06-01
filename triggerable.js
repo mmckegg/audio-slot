@@ -63,5 +63,13 @@ function Triggerable (context, params, trigger) {
     }
   }
 
+  obs.destroy = function () {
+    Object.keys(obs).forEach(function (key) {
+      if (obs[key] && typeof obs[key].destroy === 'function') {
+        obs[key].destroy()
+      }
+    })
+  }
+
   return obs
 }

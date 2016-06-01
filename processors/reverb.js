@@ -39,7 +39,7 @@ function ReverbNode (context) {
 
     wet: Param(context, 1),
     dry: Param(context, 1)
-  })
+  }, [cancel])
 
   obs.time(refreshImpulse)
   obs.decay(refreshImpulse)
@@ -53,24 +53,19 @@ function ReverbNode (context) {
   Apply(context, wet.gain, obs.wet)
   Apply(context, dry.gain, obs.dry)
 
-  obs.destroy = function () {
-    // release context.tempo
+  return obs
+
+  // scoped
+  function cancel () {
     if (building) {
       buildImpulse.cancel(building)
     }
   }
 
-  return obs
-
-  // scoped
   function refreshImpulse () {
     var rate = context.audio.sampleRate
     var length = Math.max(rate * obs.time(), 1)
-
-    if (building) {
-      buildImpulse.cancel(building)
-    }
-
+    cancel()
     building = buildImpulse(length, obs.decay(), obs.reverse(), function (channels) {
       var impulse = context.audio.createBuffer(2, length, rate)
       impulse.getChannelData(0).set(channels[0])

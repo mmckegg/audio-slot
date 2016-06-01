@@ -30,6 +30,8 @@ function DelayNode (context) {
   dry.connect(output)
   wet.connect(output)
 
+  var releases = []
+
   var obs = Processor(context, input, output, {
     time: Param(context, 0.25),
     sync: Property(false),
@@ -40,12 +42,15 @@ function DelayNode (context) {
 
     wet: Param(context, 1),
     dry: Param(context, 1)
-  })
+  }, releases)
 
   var rateMultiplier = Transform(context, [
     { param: obs.sync },
     { param: context.tempo, transform: getRateMultiplier }
   ])
+
+  // release context.tempo
+  releases.push(rateMultiplier.destroy)
 
   var time = Transform(context, [
     { param: obs.time },
@@ -63,11 +68,6 @@ function DelayNode (context) {
 
   Apply(context, wet.gain, obs.wet)
   Apply(context, dry.gain, obs.dry)
-
-  obs.destroy = function () {
-    // release context.tempo
-    rateMultiplier.destroy()
-  }
 
   return obs
 }

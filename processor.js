@@ -3,7 +3,7 @@ var Param = require('audio-slot-param')
 
 module.exports = ProcessorNode
 
-function ProcessorNode (context, input, output, params) {
+function ProcessorNode (context, input, output, params, releases) {
   var obs = ObservStruct(params)
 
   obs.input = input
@@ -26,6 +26,17 @@ function ProcessorNode (context, input, output, params) {
 
   obs.cancelFrom = function (at) {
     Param.cancelFrom(obs, at)
+  }
+
+  obs.destroy = function () {
+    while (releases && releases.length) {
+      releases.pop()()
+    }
+    Object.keys(obs).forEach(function (key) {
+      if (obs[key] && typeof obs[key].destroy === 'function') {
+        obs[key].destroy()
+      }
+    })
   }
 
   return obs

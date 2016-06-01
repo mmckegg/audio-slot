@@ -7,7 +7,7 @@ var extend = require('xtend')
 
 module.exports = RoutableSlot
 
-function RoutableSlot (context, properties, input, output) {
+function RoutableSlot (context, properties, input, output, releases) {
   var audioContext = context.audio
 
   output = output || input
@@ -52,6 +52,11 @@ function RoutableSlot (context, properties, input, output) {
   }
 
   obs.destroy = function () {
+    Object.keys(obs).forEach(function (key) {
+      if (obs[key] && typeof obs[key].destroy === 'function') {
+        obs[key].destroy()
+      }
+    })
     removeSlotWatcher && removeSlotWatcher()
     removeSlotWatcher = null
   }

@@ -20,6 +20,7 @@ function PingPongDelayNode (context) {
   var feedback = context.audio.createGain()
   var dry = context.audio.createGain()
   var wet = context.audio.createGain()
+  var releases = []
 
   // feedback loop
   input.connect(filter)
@@ -48,12 +49,15 @@ function PingPongDelayNode (context) {
 
     wet: Param(context, 1),
     dry: Param(context, 1)
-  })
+  }, releases)
 
   var rateMultiplier = Transform(context, [
     { param: obs.sync },
     { param: context.tempo, transform: getRateMultiplier }
   ])
+
+  // release context.tempo
+  releases.push(rateMultiplier.destroy)
 
   var time = Transform(context, [
     { param: obs.time },
@@ -72,11 +76,6 @@ function PingPongDelayNode (context) {
 
   Apply(context, wet.gain, obs.wet)
   Apply(context, dry.gain, obs.dry)
-
-  obs.destroy = function () {
-    // release context.tempo
-    rateMultiplier.destroy()
-  }
 
   return obs
 }

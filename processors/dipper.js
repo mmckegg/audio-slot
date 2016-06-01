@@ -22,7 +22,10 @@ function DipperNode (context) {
   var obs = Processor(context, input, output, {
     mode: Property('modulate'),
     ratio: Param(context, 1)
-  })
+  }, [
+    to.disconnect.bind(to),
+    from.disconnect.bind(from)
+  ])
 
   watch(obs.mode, function (value) {
     if (value === 'source') {
@@ -33,11 +36,6 @@ function DipperNode (context) {
       from.connect(output.gain)
     }
   })
-
-  obs.destroy = function () {
-    to.disconnect()
-    from.disconnect()
-  }
 
   Apply(context, to.gain, obs.ratio)
   Apply(context, from.gain, obs.ratio)
