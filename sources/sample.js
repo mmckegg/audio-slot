@@ -64,6 +64,7 @@ function SampleNode (context) {
         choker.disconnect.bind(choker)
       ])
 
+      event.maxTo = at + (buffer.duration - player.loopStart) / playbackRate.getValueAt(at)
       event.to = at + (player.loopEnd - player.loopStart) / playbackRate.getValueAt(at)
 
       if (mode !== 'release') {

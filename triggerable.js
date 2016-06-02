@@ -19,9 +19,10 @@ function Triggerable (context, params, trigger) {
       Param.triggerOn(obs, at)
 
       if (event.to) {
-        var stopAt = Math.max(at + obs.getReleaseDuration(), event.to)
+        var stopAt = event.to + obs.getReleaseDuration()
+        stopAt = Math.min(stopAt, event.maxTo || stopAt)
         event.stop(stopAt)
-        Param.triggerOff(obs, stopAt + 0.0001)
+        Param.triggerOff(obs, stopAt)
       }
     }
   }
