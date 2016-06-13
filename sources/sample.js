@@ -60,14 +60,25 @@ function SampleNode (context) {
 
       var event = new ScheduleEvent(at, player, choker, [
         Apply(context, player.playbackRate, playbackRate),
-        ApplyLoopMode(context, player, obs.mode),
         choker.disconnect.bind(choker)
       ])
 
       event.maxTo = at + (buffer.duration - player.loopStart) / playbackRate.getValueAt(at)
       event.to = at + (player.loopEnd - player.loopStart) / playbackRate.getValueAt(at)
 
-      if (mode !== 'release') {
+      if (mode === 'loop') {
+        player.loop = true
+        event.to = null
+      }
+
+      if (mode === 'release') {
+        event.to = null
+        event.stop = function (at) {
+          if (at) {
+            player.start(at, player.loopStart, (player.loopEnd - player.loopStart) / playbackRate.getValueAt(at))
+          }
+        }
+      } else {
         player.start(at, player.loopStart)
       }
 
@@ -78,14 +89,6 @@ function SampleNode (context) {
       return event
     }
   }
-}
-
-function ApplyLoopMode (context, target, mode) {
-  return watch(mode, setLoopMode.bind(this, context, target))
-}
-
-function setLoopMode (context, target, mode) {
-  target.loop = mode === 'loop'
 }
 
 function noteOffsetToRate (baseRate, value) {
