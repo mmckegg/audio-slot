@@ -65,18 +65,20 @@ function Envelope (context) {
   obs.triggerOff = function (at) {
     at = Math.max(at, context.audio.currentTime)
 
+    var releaseTime = obs.release.getValueAt(at)
+
     // release
-    if (obs.release()) {
+    if (releaseTime) {
       broadcast({
         value: 0, at: at,
-        duration: obs.release.getValueAt(at),
+        duration: releaseTime,
         mode: 'log'
       })
     } else {
       broadcast({ value: 0, at: at })
     }
 
-    return at + obs.release()
+    return at + releaseTime
   }
 
   obs.cancelFrom = function (at) {
@@ -85,7 +87,7 @@ function Envelope (context) {
   }
 
   obs.getReleaseDuration = function () {
-    return obs.release()
+    return obs.release.getValueAt(context.audio.currentTime)
   }
 
   setImmediate(function () {
