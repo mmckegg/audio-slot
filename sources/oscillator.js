@@ -12,9 +12,7 @@ module.exports = OscillatorNode
 function OscillatorNode (context) {
   var output = context.audio.createGain()
   var amp = context.audio.createGain()
-  var power = context.audio.createGain()
   amp.gain.value = 0
-  power.connect(amp)
   amp.connect(output)
 
   var obs = Triggerable(context, {
@@ -39,7 +37,6 @@ function OscillatorNode (context) {
     { param: frequency, transform: frequencyToPowerRolloff }
   ])
 
-  Apply(context, power.gain, powerRolloff)
   Apply(context, amp.gain, obs.amp)
 
   obs.connect = output.connect.bind(output)
@@ -50,14 +47,18 @@ function OscillatorNode (context) {
   // scoped
   function trigger (at) {
     var oscillator = context.audio.createOscillator()
+    var power = context.audio.createGain()
     var choker = context.audio.createGain()
+    oscillator.frequency.setValueAtTime(frequency.getValueAt(at), at)
     oscillator.start(at)
-    oscillator.connect(choker)
+    oscillator.connect(power)
+    power.connect(choker)
     choker.connect(amp)
 
     return new ScheduleEvent(at, oscillator, choker, [
       Apply(context, oscillator.detune, obs.detune),
       Apply(context, oscillator.frequency, frequency),
+      Apply(context, power.gain, powerRolloff),
       ApplyShape(context, oscillator, obs.shape),
       choker.disconnect.bind(choker)
     ])
