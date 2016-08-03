@@ -13,7 +13,6 @@ function CompressorNode (context) {
     threshold: Param(context, node.threshold.defaultValue),
     knee: Param(context, node.knee.defaultValue),
     ratio: Param(context, node.ratio.defaultValue),
-    reduction: Param(context, node.reduction.defaultValue),
     attack: Param(context, node.attack.defaultValue),
     release: Param(context, node.release.defaultValue)
   })
@@ -21,7 +20,6 @@ function CompressorNode (context) {
   Apply(context, node.threshold, obs.threshold)
   Apply(context, node.knee, obs.knee)
   Apply(context, node.ratio, obs.ratio)
-  Apply(context, node.reduction, obs.reduction)
   Apply(context, node.attack, obs.attack)
   Apply(context, node.release, obs.release)
 
