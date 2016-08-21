@@ -14,6 +14,7 @@ function Envelope (context) {
     decay: Param(context, 0),
     release: Param(context, 0),
     sustain: Param(context, 1),
+    retrigger: Property(false),
     value: Param(context, 1)
   })
 
@@ -43,6 +44,9 @@ function Envelope (context) {
     var peakTime = at + (obs.attack() || 0.005)
 
     if (obs.attack()) {
+      if (obs.retrigger()) {
+        broadcast({ value: 0, at: at })
+      }
       broadcast({
         value: 1,
         at: at,
