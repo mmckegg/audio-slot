@@ -105,7 +105,6 @@ function LFO (context) {
 
       event.end = stopAt
     }
-
   }
 
   obs.destroy = function () {
@@ -120,7 +119,6 @@ function LFO (context) {
   function handleSchedule (schedule) {
     var from = schedule.time
     var to = schedule.time + schedule.duration
-
     for (var i = active.length - 1;i >= 0;i--) {
       var event = active[i]
 
@@ -146,7 +144,7 @@ function LFO (context) {
       event.nextTime = from
     }
 
-    if (event.start <= from && (!event.end || event.end > to)) {
+    if (event.start <= to && (!event.end || event.end > from)) {
       var rate = obs.rate.getValueAt(from)
 
       if (obs.sync()) {
@@ -157,7 +155,6 @@ function LFO (context) {
 
       while (event.nextTime < to) {
         step(event.nextTime, duration)
-
         event.nextTime += duration
         if (obs.mode() !== 'oneshot') {
           event.nextOffset = event.nextOffset % 1
