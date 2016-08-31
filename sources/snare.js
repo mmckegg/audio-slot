@@ -21,7 +21,7 @@ function SnareNode (context) {
     type: Property('snare'),
     tune: Param(context, 0), // cents
     tone: Param(context, 0.5), // ratio
-    decay: Param(context, 0.5), // seconds
+    decay: Param(context, 0.2), // seconds
     snappy: Param(context, 0.5), // ratio
     amp: Param(context, 0.4)
   }, trigger)
