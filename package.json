@@ -1,6 +1,6 @@
 {
   "name": "audio-slot",
-  "version": "5.3.1",
+  "version": "5.3.2",
   "description": "Web Audio API FRP wrapper for creating, routing, and triggering AudioNodes.",
   "main": "index.js",
   "scripts": {
